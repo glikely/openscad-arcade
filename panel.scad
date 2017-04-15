@@ -35,13 +35,13 @@ module panel_controls(cutout=false)
 	// Game Controls
 	translate([0,curve_radius-panel_depth+150,0]) {
 		rotate([0,0,-curve_angle * 1.5]) translate([0,-curve_radius,0])
-			button_pad(undermount=plex_thick+0.1, cutout=cutout);
+			button_pad(undermount=plex_thick+0.1, cutout=cutout, count=4);
 		rotate([0,0,-curve_angle * 0.5]) translate([0,-curve_radius,0])
-			button_pad(blue, undermount=plex_thick+0.1, cutout=cutout);
+			button_pad(blue, undermount=plex_thick+0.1, cutout=cutout, count=6);
 		rotate([0,0, curve_angle * 0.5]) translate([0,-curve_radius,0])
-			button_pad(green, undermount=plex_thick+0.1, cutout=cutout);
+			button_pad(green, undermount=plex_thick+0.1, cutout=cutout, count=6);
 		rotate([0,0, curve_angle * 1.5]) translate([0,-curve_radius,0])
-			button_pad(yellow, undermount=plex_thick+0.1, cutout=cutout);
+			button_pad(yellow, undermount=plex_thick+0.1, cutout=cutout, count=4);
 	}
 }
 

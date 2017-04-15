@@ -47,28 +47,30 @@ module button(color=red, cutout=false) {
 	}
 }
 
-module joystick(color=red, cutout=false) {
+module joystick(color=red, undermount=0, cutout=false) {
 	shaft_len = 27.5+31.8+3.9;
 	plate_width = 65;
 	plate_height = 97;
 
 	if (!cutout) {
-		// Ball top
-		color(color) {
-			translate([0,0,27.5+(32/2)]) sphere(34/2);
+		translate([0,0,-undermount]) {
+			// Ball top
+			color(color) {
+				translate([0,0,27.5+(32/2)]) sphere(34/2);
+			}
+			// shaft
+			color(silver) translate([0,0,-shaft_len+28]) cylinder(r=4, h=shaft_len);
+
+			// mounting plate
+			color(silver) translate([0,0,-2/2]) cube([plate_width, plate_height, 1.6], center=true);
+
+			// Electronics box
+			color(black) translate([0,0,-2-(31.8/2)]) cube([50,50,31.8], center=true);
 		}
-		// shaft
-		color(silver) translate([0,0,-shaft_len+28]) cylinder(r=4, h=shaft_len);
+		// Dust Cover Disc
+		color(black) cylinder(r=18, h=0.5);
 
-		// Disc
-		color(black) translate([0,0,plex_thick]) cylinder(r=18, h=0.5);
-
-		// mounting plate
-		color(silver) translate([0,0,-2/2]) cube([plate_width, plate_height, 1.6], center=true);
-
-		// Electronics box
-		color(black) translate([0,0,-2-(31.8/2)]) cube([50,50,31.8], center=true);
-	} else {
+	} else translate([0,0,-undermount]) {
 		// The cutouts for the joystick
 		// Mount place profile
 		translate([0,0,-2/2]) cube([plate_width+5, plate_height+5, 2], center=true);
@@ -80,16 +82,14 @@ module joystick(color=red, cutout=false) {
 	}
 }
 
-module button_pad(color=red, undermount=4, cutout=false) {
-	translate([0,-14,0]) button(color, cutout=cutout); // 1st bottom
-	translate([7,-14+38.5,0]) button(color, cutout=cutout); // 1st top
-	translate([33,   0,      0]) button(color, cutout=cutout); // 2nd bottom
-	translate([33+7, 0+38.5, 0]) button(color, cutout=cutout); // 2nd top
-	translate([33+36,     -6,      0]) button(color, cutout=cutout); // 3nd bottom
-	translate([33+36+6.5, -6+38.5, 0]) button(color, cutout=cutout); // 3nd top
-	translate([33+36+34,     -6-15,      0]) button(color, cutout=cutout); // 4th bottom
-	translate([33+36+34+6.5, -6-15+38.5, 0]) button(color, cutout=cutout); // 4th top
-	translate([-59,0,-undermount]) joystick(color, cutout=cutout);
+module button_pad(color=red, undermount=0, cutout=false, count=8) {
+	layout = [[0,-14,0],   [7,-14+38.5,0],
+	          [33,0,0],    [33+7,38.5,0],
+	          [33+36,-6,0],[33+36+6.5,-6+38.5],
+	          [33+36+34,-6-15,0],[33+36+34+6.5,-6-15+38.5,0]];
+	for(p=[0:count-1])
+		translate(layout[p]) button(color, cutout=cutout); // 1st bottom
+	translate([-59,0,0]) joystick(color, undermount=undermount, cutout=cutout);
 }
 
 button_pad();
