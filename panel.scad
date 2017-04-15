@@ -32,16 +32,18 @@ module panel_profile(thickness) {
 
 module panel_controls(cutout=false)
 {
+	player_config = [[-curve_angle*1.5, 4, red],
+	                 [-curve_angle*0.5, 6, blue],
+	                 [ curve_angle*0.5, 6, green],
+	                 [ curve_angle*1.5, 4, yellow]];
+	// Player Start buttons
+	for (i=[0:3])
+		translate([-150+i*100,-75,0]) button(color=[1,1,1], cutout=cutout);
 	// Game Controls
 	translate([0,curve_radius-panel_depth+150,0]) {
-		rotate([0,0,-curve_angle * 1.5]) translate([0,-curve_radius,0])
-			button_pad(undermount=plex_thick+0.1, cutout=cutout, count=4);
-		rotate([0,0,-curve_angle * 0.5]) translate([0,-curve_radius,0])
-			button_pad(blue, undermount=plex_thick+0.1, cutout=cutout, count=6);
-		rotate([0,0, curve_angle * 0.5]) translate([0,-curve_radius,0])
-			button_pad(green, undermount=plex_thick+0.1, cutout=cutout, count=6);
-		rotate([0,0, curve_angle * 1.5]) translate([0,-curve_radius,0])
-			button_pad(yellow, undermount=plex_thick+0.1, cutout=cutout, count=4);
+		for (p=player_config)
+			rotate([0,0,p[0]]) translate([0,-curve_radius,0])
+				button_pad(undermount=plex_thick+0.1, cutout=cutout, count=p[1], color=p[2]);
 	}
 }
 
