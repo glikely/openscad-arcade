@@ -36,7 +36,7 @@ module button(color=red, cutout=false) {
 		}
 
 		translate([0, 0, - (screw_length + switch_height/2 + 1)])
-			color(black)
+			color(BlackPaint)
 				cube([switch_length, switch_width, switch_height], center = true);
 	} else union() {
 		// Dimensions for mounting hole. Right through all the layers
@@ -65,7 +65,7 @@ module joystick(color=red, undermount=0, cutout=false) {
 			color(silver) translate([0,0,-2/2]) cube([plate_width, plate_height, 1.6], center=true);
 
 			// Electronics box
-			color(black) translate([0,0,-2-(31.8/2)]) cube([50,50,31.8], center=true);
+			color(BlackPaint) translate([0,0,-2-(31.8/2)]) cube([50,50,31.8], center=true);
 		}
 		// Dust Cover Disc
 		color(black) cylinder(r=18, h=0.5);
@@ -92,5 +92,61 @@ module button_pad(color=red, undermount=0, cutout=false, count=8) {
 	translate([-59,0,0]) joystick(color, undermount=undermount, cutout=cutout);
 }
 
-button_pad();
+module utrak_trackball(undermount=17, cutout=false)
+{
+	box_width = 145;
+	box_height = 53;
+	diag_length = 176;
+	diag_width = 126.5;
+	hole_spacing = 81.32;
+	hole_radius = 5/2;
+	housing_height = 19;
+	housing_radius = 82/2;
+	flang_height = 2;
+	flang_radius = housing_radius + 5;
+
+	if (!cutout) translate([0,0,-undermount]){
+		// Housing
+		color(BlackPaint) difference() {
+			translate([0,0,-box_height/2]) intersection() {
+				cube([box_width,box_width,box_height], center=true);
+				rotate([0,0,45])
+					cube([diag_width,diag_length,box_height+0.2], center=true);
+			}
+			// Bolt holes
+			for (i=[0:3])
+				rotate([0,0,45+90*i])
+					translate([hole_spacing/2,hole_spacing/2,-box_height-0.1])
+						cylinder(r=hole_radius, h=box_height+0.2);
+		}
+		color(BlackPaint) difference() {
+			union() {
+				cylinder(r=housing_radius,h=housing_height);
+				if (undermount <= 17)
+					translate([0,0,19-flang_height])
+						cylinder(r=flang_radius,h=flang_height);
+			}
+			translate([0,0,-0.1]) {
+				cylinder(r=housing_radius-2,h=housing_height+0.1-flang_height);
+				cylinder(r=housing_radius-5,h=housing_height+0.2);
+			}
+		}
+		// Trackball
+		translate([0,0,0]) color([1,0,1,0.75]) sphere(3/2 * 25.4);
+	} else translate([0,0,-undermount-box_height/2]) {
+		intersection() {
+			cube([box_width+5,box_width+5,box_height], center=true);
+			rotate([0,0,45])
+				cube([diag_width+5,diag_length+5,box_height+0.2], center=true);
+		}
+		cylinder(r=housing_radius, h=box_height + undermount);
+	}
+}
+
+translate([0,200,0]) button_pad();
+translate([200,200,0]) button_pad(cutout=true);
+translate([0,0,0]) utrak_trackball();
+translate([200,0,0]) utrak_trackball(cutout=true);
+translate([0,-200,0]) utrak_trackball(undermount=19);
+translate([200,-200,0]) utrak_trackball(undermount=19,cutout=true);
 

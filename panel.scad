@@ -45,6 +45,8 @@ module panel_controls(cutout=false)
 			rotate([0,0,p[0]]) translate([0,-curve_radius,0])
 				button_pad(undermount=plex_thick+0.1, cutout=cutout, count=p[1], color=p[2]);
 	}
+
+	translate([0,-panel_depth+300,0]) utrak_trackball(cutout=cutout);
 }
 
 module panel() {
