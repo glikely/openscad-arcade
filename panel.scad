@@ -30,20 +30,28 @@ module panel_profile(thickness) {
 	}
 }
 
-module panel_controls(cutout=false)
+player_config_4 = [[-curve_angle*1.5, 4, red],
+                   [-curve_angle*0.5, 6, blue],
+                   [ curve_angle*0.5, 6, green],
+                   [ curve_angle*1.5, 4, yellow]];
+
+module panel_controls(cutout=false, start_spacing=60, start_colour=[1,1,1],
+                      player_config=player_config_4)
 {
-	player_config = [[-curve_angle*1.5, 4, red],
-	                 [-curve_angle*0.5, 6, blue],
-	                 [ curve_angle*0.5, 6, green],
-	                 [ curve_angle*1.5, 4, yellow]];
+	num_players = len(player_config);
+
 	// Player Start buttons
-	for (i=[0:3])
-		translate([-150+i*100,-75,0]) button(color=[1,1,1], cutout=cutout);
+	translate([-start_spacing*(num_players-1)/2, -75, 0])
+		for (i=[0:num_players-1])
+			translate([start_spacing*i,0,0])
+				button(color=start_colour, cutout=cutout);
+
 	// Game Controls
 	translate([0,curve_radius-panel_depth+150,0]) {
 		for (p=player_config)
 			rotate([0,0,p[0]]) translate([0,-curve_radius,0])
-				button_pad(undermount=plex_thick+0.1, cutout=cutout, count=p[1], color=p[2]);
+				button_pad(undermount=plex_thick+0.1, cutout=cutout,
+				           count=p[1], color=p[2]);
 	}
 
 	translate([0,-panel_depth+300,0]) utrak_trackball(cutout=cutout);
