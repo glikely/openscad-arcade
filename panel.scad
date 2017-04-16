@@ -35,16 +35,20 @@ player_config_4 = [[-curve_angle*1.5, 4, red],
                    [ curve_angle*0.5, 6, green],
                    [ curve_angle*1.5, 4, yellow]];
 
-module panel_controls(cutout=false, start_spacing=60, start_colour=[1,1,1],
-                      player_config=player_config_4)
+module panel_controls(cutout=false, start_spacing=100, start_colour=[1,1,1],
+                      player_config=player_config_4, coin_spacing=40)
 {
 	num_players = len(player_config);
 
 	// Player Start buttons
 	translate([-start_spacing*(num_players-1)/2, -75, 0])
-		for (i=[0:num_players-1])
-			translate([start_spacing*i,0,0])
+		for (i=[0:num_players-1]) {
+			translate([start_spacing*i-coin_spacing/2,0,0])
 				button(color=start_colour, cutout=cutout);
+			if (coin_spacing > 0)
+				translate([start_spacing*i+coin_spacing/2,0,0])
+					button(color=player_config[i][2], cutout=cutout);
+		}
 
 	// Game Controls
 	translate([0,curve_radius-panel_depth+150,0]) {
