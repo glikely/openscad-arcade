@@ -2,7 +2,7 @@
 
 This project contains models for designing and building arcade cabinets.
 
-![Arcade Panel](images/example_panel.png)
+![Arcade Panel](images/example_cabinet.png)
 
 ## Features
 
