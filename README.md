@@ -37,7 +37,6 @@ The following features still need to be implemented
 - PDF output of control panel layout to be used as template for graphics design
 - Automatic generation of box around control panel
 - Flattened layout of cabinet panels to use as cutting guide
-- Model of full arcade cabinet
 - Support for alternate button layouts. Currently only implements angled layout
 - Support for side mounted pinball buttons
 - Check joystick mount dimensions are correct for all joystick manufactures
