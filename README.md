@@ -41,7 +41,7 @@ The following features still need to be implemented
 - Support for side mounted pinball buttons
 - Check joystick mount dimensions are correct for all joystick manufactures
 - Model "spinner" controls
-- Model coin slots
+- Model coin slots/door
 - Model control boards and mounts
 - Model speakers
 
