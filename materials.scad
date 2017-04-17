@@ -1,6 +1,6 @@
 
 mdf_thick = 25.4 * 3 / 4;
-plex_thick = 4;
+plex_thick = 2;
 
 // Solid Colours
 black = [0,0,0];
