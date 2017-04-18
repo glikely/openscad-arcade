@@ -1,5 +1,5 @@
 include <materials.scad>
-use <panel.scad>
+use <control_box.scad>
 
 cabinet_height = 1760;
 cabinet_depth = 690;
