@@ -1,17 +1,19 @@
 include <materials.scad>
 use <controls.scad>
 
-inset_width = 602;
-inset_depth = 150;
-
-panel_width = 1000;
-panel_depth = 550;
+// Default dimensions used for convenience in testing
+default_width = 1000;
+default_depth = 550;
+default_inset = 150;
+default_cab_width = 602;
 
 curve_radius = 500;
-curve_angle = asin((panel_width/2 - 275)/curve_radius);
+curve_angle = asin((default_width/2 - 275)/curve_radius);
 
 // Top panel
-module panel_profile(width=1000, depth=550, inset=150, cab_width=602) {
+module panel_profile(width=default_width, depth=default_depth,
+                     inset=default_inset, cab_width=default_cab_width)
+{
 	difference() {
 		intersection() {
 			translate([-width/2,-depth,0])
@@ -22,10 +24,10 @@ module panel_profile(width=1000, depth=550, inset=150, cab_width=602) {
 		union() {
 			translate([cab_width/2,-inset,0])
 				square([(width - cab_width)/2+1, inset+1]);
-			translate([-(width/2+1),-inset_depth+1,0])
-				square([(width - inset_width)/2+1, inset_depth+1]);
-			translate([inset_width/2,-inset_depth,0])
-				square([inset_width, inset_depth]);
+			translate([-(width/2+1),-inset+1,0])
+				square([(width - cab_width)/2+1, inset+1]);
+			translate([cab_width/2,-inset,0])
+				square([cab_width, inset]);
 		}
 	}
 }
@@ -41,8 +43,11 @@ player_config_4 = [[-curve_angle*1.5, 4, red],
                    [ curve_angle*0.5, 6, green],
                    [ curve_angle*1.5, 4, yellow]];
 
-module panel_controls(cutout=false, skirting=false, start_spacing=120, start_colour=[1,1,1],
-                      player_config=player_config_4, coin_spacing=50, trackball=true, undermount=0)
+module panel_controls(width=default_width, depth=default_depth,
+                      inset=default_inset, cab_width=default_cab_width,
+                      cutout=false, skirting=false, start_spacing=120,
+                      start_colour=[1,1,1], player_config=player_config_4,
+                      coin_spacing=50, trackball=true, undermount=0)
 {
 	num_players = len(player_config);
 
@@ -62,7 +67,7 @@ module panel_controls(cutout=false, skirting=false, start_spacing=120, start_col
 		}
 
 	// Game Controls
-	translate([0,curve_radius-panel_depth+100,0]) {
+	translate([0,curve_radius-depth+100,0]) {
 		for (p=player_config)
 			rotate([0,0,p[0]]) translate([0,-curve_radius,0])
 				button_pad(undermount=undermount,
@@ -71,16 +76,22 @@ module panel_controls(cutout=false, skirting=false, start_spacing=120, start_col
 	}
 
 	if (trackball)
-		translate([0,-panel_depth+300,0]) utrak_trackball(cutout=cutout);
+		translate([0,-depth+300,0]) utrak_trackball(cutout=cutout);
 }
 
-module panel_multilayer(layers=[[FiberBoard, mdf_thick, plex_thick+0.2],
-                              [[0,0,1,.3], plex_thick, 0]])
+module panel_multilayer(layers=[[[0,0,1,.3], plex_thick],
+                                [FiberBoard, mdf_thick]], i=0)
 {
-	depth = 0;
-	for (l=layers)
-		color(l[0]) translate([0,0,-(l[1] + l[2])])
-			linear_extrude(l[1], convexity=10) children();
+	if (i < len(layers)) {
+		// Draw the bottom layers first on the assumption that the top
+		// layer will be transparent. OpenSCAD Preview shows the right
+		// thing if transparent items are added last.
+		translate([0,0,-layers[i][1]-0.2])
+			panel_multilayer(layers, i+1) children();
+		// Add the layer
+		color(layers[i][0]) translate([0,0,-layers[i][1]])
+			linear_extrude(layers[i][1], convexity=10) children();
+	}
 }
 
 module panel() {
