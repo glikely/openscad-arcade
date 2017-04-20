@@ -38,11 +38,11 @@ player_config_5 = [[4, "red", "sega2"],
                    [4, "yellow", "sega2"]];
 
 module panel_controls(size, r, cutout=false, start_spacing=120,
-                      start_colour="white", player_config=player_config_4,
+                      start_colour="white", pc=player_config_4,
                       coin_spacing=50, trackball=true, undermount=0)
 {
 	curve_origin=r-size[1];
-	num_players = len(player_config);
+	num_players = len(pc);
 	spacing = (size[0]-50)/num_players;
 	curve_angle = asin((spacing/2)/(r-100))*2;
 
@@ -55,15 +55,15 @@ module panel_controls(size, r, cutout=false, start_spacing=120,
 			}
 			if (coin_spacing > 0) {
 				translate([start_spacing*i+coin_spacing/2,0,0]) {
-					button(color=player_config[i][1], cutout=cutout);
+					button(color=pc[i][1], cutout=cutout);
 					translate([0,-40,0]) text("coin", halign="center");
 				}
 			}
 		}
 
 	// Game Controls
-	for (idx=[0:len(player_config)-1]) {
-		p = player_config[idx];
+	for (idx=[0:len(pc)-1]) {
+		p = pc[idx];
 		offset = idx - (num_players-1)/2;
 		if (r) {
 			translate([0,curve_origin,0]) rotate([0,0,offset*curve_angle])
@@ -72,7 +72,7 @@ module panel_controls(size, r, cutout=false, start_spacing=120,
 						   cutout=cutout,
 						   max_buttons=p[0], color=p[1], layout_name=p[2]);
 					// Guide lines
-					rotate([0,90,0]) square([1, curve_radius]);
+					rotate([0,90,0]) square([1, r]);
 				}
 		} else {
 			translate([offset*spacing, -size[1]+100])
@@ -105,15 +105,21 @@ default_size = [900, 450];
 default_inset = [602, 150];
 default_radius = 1000;
 
-module panel(size=default_size, inset=default_inset, r=default_radius) {
-	panel_controls(size, r=r, undermount=plex_thick+0.1);
+module panel(size=default_size, inset=default_inset, r=default_radius, pc=player_config_4) {
+	panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1);
 	difference() {
 		panel_multilayer() panel_profile(size, inset, r=r);
-		panel_controls(size, r=r, undermount=plex_thick+0.1, cutout=true);
+		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1, cutout=true);
 	}
 }
 
-panel();
+rad=[undef,2000,1000,800];
+for (idx=[1:1]) {
+	xoff = (idx-1)*(default_size[0])*1.2;
+	//translate([xoff,-1*default_size[1]*1.2,0]) panel(pc=player_config_2,r=rad[idx]);
+	translate([xoff,0*default_size[1]*1.2,0]) panel(pc=player_config_4,r=rad[idx]);
+	//translate([xoff,1*default_size[1]*1.2,0]) panel(pc=player_config_3,r=rad[idx]);
+}
 //projection(cut=true) translate([0,0,plex_thick/2]) panel();
 //projection(cut=true) translate([0,0,plex_thick+0.3]) panel();
 //projection(cut=true) translate([0,0,plex_thick+mdf_thick]) panel();
