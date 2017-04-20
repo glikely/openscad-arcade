@@ -2,7 +2,7 @@ include <materials.scad>
 
 undermount_depth = 3;
 
-module button(color=red, cutout=false) {
+module button(color="red", cutout=false) {
 	// Parameters
 	screw_diameter = 23.8;
 	screw_length = 31.2;
@@ -47,7 +47,7 @@ module button(color=red, cutout=false) {
 	}
 }
 
-module joystick(color=red, undermount=0, cutout=false) {
+module joystick(color="red", undermount=0, cutout=false) {
 	shaft_len = 27.5+31.8+3.9;
 	plate_width = 65;
 	plate_height = 97;
@@ -59,16 +59,16 @@ module joystick(color=red, undermount=0, cutout=false) {
 				translate([0,0,27.5+(32/2)]) sphere(34/2);
 			}
 			// shaft
-			color(silver) translate([0,0,-shaft_len+28]) cylinder(r=4, h=shaft_len);
+			color("silver") translate([0,0,-shaft_len+28]) cylinder(r=4, h=shaft_len);
 
 			// mounting plate
-			color(silver) translate([0,0,-2/2]) cube([plate_width, plate_height, 1.6], center=true);
+			color("silver") translate([0,0,-2/2]) cube([plate_width, plate_height, 1.6], center=true);
 
 			// Electronics box
 			color(BlackPaint) translate([0,0,-2-(31.8/2)]) cube([50,50,31.8], center=true);
 		}
 		// Dust Cover Disc
-		color(black) cylinder(r=18, h=0.5);
+		color("black") cylinder(r=18, h=0.5);
 
 	} else translate([0,0,-undermount]) {
 		// The cutouts for the joystick
@@ -161,7 +161,7 @@ layouts = [
 	               ["button", [100, -40], [110,0], [100,40]]]
 ];
 
-module control_cluster(color=red, undermount=0, layout_name="sega2", cutout=false, max_buttons=8) {
+module control_cluster(color="red", undermount=0, layout_name="sega2", cutout=false, max_buttons=8) {
 	layout = layouts[search([layout_name], layouts)[0]];
 
 	// Find and place list of buttons

@@ -2,14 +2,6 @@
 mdf_thick = 25.4 * 3 / 4;
 plex_thick = 2;
 
-// Solid Colours
-black = [0,0,0];
-silver = [0.8,0.8,0.8];
-red = [1,0,0];
-green = [0,1,0];
-blue = [0.1,0.1,1];
-yellow = [1,1,0];
-
 // Materials
 Oak = [0.65, 0.5, 0.4];
 Pine = [0.85, 0.7, 0.45];

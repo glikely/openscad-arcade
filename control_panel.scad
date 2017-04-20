@@ -27,16 +27,16 @@ module panel_profile(size, inset)
 	}
 }
 
-player_config_1 = [[0, 8, red]];
-player_config_2 = [[-curve_angle*0.5, 6, red],
-                   [ curve_angle*0.5, 6, blue]];
-player_config_3 = [[-curve_angle, 6, red],
-                   [           0, 6, blue],
-                   [ curve_angle, 6, yellow]];
-player_config_4 = [[-curve_angle*1.5, 4, red],
-                   [-curve_angle*0.5, 6, blue],
-                   [ curve_angle*0.5, 6, green],
-                   [ curve_angle*1.5, 4, yellow]];
+player_config_1 = [[0, 8, "red"]];
+player_config_2 = [[-curve_angle*0.5, 6, "red"],
+                   [ curve_angle*0.5, 6, "blue"]];
+player_config_3 = [[-curve_angle, 6, "red"],
+                   [           0, 6, "blue"],
+                   [ curve_angle, 6, "yellow"]];
+player_config_4 = [[-curve_angle*1.5, 4, "red"],
+                   [-curve_angle*0.5, 6, "blue"],
+                   [ curve_angle*0.5, 6, "green"],
+                   [ curve_angle*1.5, 4, "yellow"]];
 
 module panel_controls(size, cutout=false, start_spacing=120,
                       start_colour="white", player_config=player_config_4,
