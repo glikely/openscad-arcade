@@ -2,32 +2,27 @@ include <materials.scad>
 use <controls.scad>
 
 // Default dimensions used for convenience in testing
-default_width = 1000;
-default_depth = 550;
-default_inset = 150;
-default_cab_width = 602;
+default_size = [1000, 550];
+default_inset = [602, 150];
 
 curve_radius = 500;
-curve_angle = asin((default_width/2 - 275)/curve_radius);
+curve_angle = asin((default_size[0]/2 - 275)/curve_radius);
 
 // Top panel
-module panel_profile(width=default_width, depth=default_depth,
-                     inset=default_inset, cab_width=default_cab_width)
+module panel_profile(size, inset)
 {
 	difference() {
 		intersection() {
-			translate([-width/2,-depth,0])
-				square([width, depth]);
-			translate([0,curve_radius-depth+150,0])
+			translate([-size[0]/2,-size[1],0])
+				square(size);
+			translate([0,curve_radius-size[1]+150,0])
 				circle(r=curve_radius+150);
 		}
-		union() {
-			translate([cab_width/2,-inset,0])
-				square([(width - cab_width)/2+1, inset+1]);
-			translate([-(width/2+1),-inset+1,0])
-				square([(width - cab_width)/2+1, inset+1]);
-			translate([cab_width/2,-inset,0])
-				square([cab_width, inset]);
+		if (inset) union() {
+			translate([inset[0]/2,-inset[1],0])
+				square([(size[0] - inset[0])/2+1, inset[1]+1]);
+			translate([-(size[0]/2+1),-inset[1],0])
+				square([(size[0] - inset[0])/2+1, inset[1]+1]);
 		}
 	}
 }
@@ -43,10 +38,8 @@ player_config_4 = [[-curve_angle*1.5, 4, red],
                    [ curve_angle*0.5, 6, green],
                    [ curve_angle*1.5, 4, yellow]];
 
-module panel_controls(width=default_width, depth=default_depth,
-                      inset=default_inset, cab_width=default_cab_width,
-                      cutout=false, skirting=false, start_spacing=120,
-                      start_colour=[1,1,1], player_config=player_config_4,
+module panel_controls(size, cutout=false, start_spacing=120,
+                      start_colour="white", player_config=player_config_4,
                       coin_spacing=50, trackball=true, undermount=0)
 {
 	num_players = len(player_config);
@@ -67,7 +60,7 @@ module panel_controls(width=default_width, depth=default_depth,
 		}
 
 	// Game Controls
-	translate([0,curve_radius-depth+100,0]) {
+	translate([0,curve_radius-size[1]+100,0]) {
 		for (p=player_config)
 			rotate([0,0,p[0]]) translate([0,-curve_radius,0])
 				control_cluster(undermount=undermount,
@@ -76,7 +69,7 @@ module panel_controls(width=default_width, depth=default_depth,
 	}
 
 	if (trackball)
-		translate([0,-depth+300,0]) utrak_trackball(cutout=cutout);
+		translate([0,-size[1]+300,0]) utrak_trackball(cutout=cutout);
 }
 
 module panel_multilayer(layers=[[[0,0,1,.3], plex_thick],
@@ -94,12 +87,15 @@ module panel_multilayer(layers=[[[0,0,1,.3], plex_thick],
 	}
 }
 
-module panel() {
-	panel_controls(undermount=plex_thick+0.1);
+module panel(size=default_size, inset=default_inset) {
+	panel_controls(size, undermount=plex_thick+0.1);
 	difference() {
-		panel_multilayer() panel_profile();
-		panel_controls(undermount=plex_thick+0.1, cutout=true);
+		panel_multilayer() panel_profile(size, inset);
+		panel_controls(size, undermount=plex_thick+0.1, cutout=true);
 	}
 }
 
 panel();
+//projection(cut=true) translate([0,0,plex_thick/2]) panel();
+//projection(cut=true) translate([0,0,plex_thick+0.3]) panel();
+//projection(cut=true) translate([0,0,plex_thick+mdf_thick]) panel();
