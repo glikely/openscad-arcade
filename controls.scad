@@ -82,16 +82,6 @@ module joystick(color=red, undermount=0, cutout=false) {
 	}
 }
 
-module button_pad(color=red, undermount=0, cutout=false, count=8) {
-	layout = [[0,-14,0],   [7,-14+38.5,0],
-	          [33,0,0],    [33+7,38.5,0],
-	          [33+36,-6,0],[33+36+6.5,-6+38.5],
-	          [33+36+34,-6-15,0],[33+36+34+6.5,-6-15+38.5,0]];
-	for(p=[0:count-1])
-		translate(layout[p]) button(color, cutout=cutout); // 1st bottom
-	translate([-59,0,0]) joystick(color, undermount=undermount, cutout=cutout);
-}
-
 module utrak_trackball(undermount=17, cutout=false)
 {
 	box_width = 145;
@@ -143,10 +133,99 @@ module utrak_trackball(undermount=17, cutout=false)
 	}
 }
 
-translate([0,200,0]) button_pad();
-translate([200,200,0]) button_pad(cutout=true);
-translate([0,0,0]) utrak_trackball();
-translate([200,0,0]) utrak_trackball(cutout=true);
-translate([0,-200,0]) utrak_trackball(undermount=19);
-translate([200,-200,0]) utrak_trackball(undermount=19,cutout=true);
+// Some of these layouts come from and use the same names as
+// http://www.slagcoin.com/joystick/layout.html
+layouts = [
+	["matrix36",["joystick", [-95,0]],
+	          ["button",  [  0,-18],[  0,18],
+	                      [ 36,-18],[ 36,18],
+	                      [ 72,-18],[ 72,18],
+	                      [108,-18],[108,18]]],
+	["sega1", ["joystick", [-59,0]],
+	          ["button",  [0,       -14],[7,             -14+38.5],
+	                      [33,        0],[33+7,              38.5],
+	                      [33+36,    -6],[33+36+6.5,      -6+38.5],
+	                      [33+36+34,-21],[33+36+34+6.5,-6-15+38.5]]],
+	["sega2", ["joystick",[-59,0]],
+	          ["button",  [0,          -20],[0,           19],
+	                      [30.5,         0],[30.5,        39],
+	                      [30.5+36,      0],[30.5+36,     39],
+	                      [30.5+36+35.5,-9],[30.5+36+35.5,30]]],
+	["hori36",["joystick",[-59,0]],
+	          ["button",  [0,        -27],[0,           9],
+	                      [31.25,     -9],[31.25,      27],
+	                      [31.25+35,   0],[31.25+35,   36],
+	                      [31.25+35+36,0],[31.25+35+36,36]]],
+	["trackball",  ["utrak", [0,0]]],
+	["trackball3", ["utrak", [0,0]],
+	               ["button", [100, -40], [110,0], [100,40]]]
+];
 
+module control_cluster(color=red, undermount=0, layout_name="sega2", cutout=false, max_buttons=8) {
+	layout = layouts[search([layout_name], layouts)[0]];
+
+	// Find and place list of buttons
+	btns=layout[search(["button"], layout)[0]];
+	for(p=[1:len(btns)-1])
+		if (p <= max_buttons)
+			translate(btns[p]) button(color, cutout=cutout); // 1st bottom
+
+	// Find and place joysticks
+	joy=layout[search(["joystick"], layout)[0]];
+	for(p=[1:len(joy)-1])
+		translate(joy[p]) joystick(color, undermount=undermount, cutout=cutout);
+
+	// Find and place trackballs
+	track=layout[search(["utrak"], layout)[0]];
+	for(p=[1:len(track)-1])
+		translate(track[p]) utrak_trackball(cutout=cutout);
+}
+
+// Demonstration code. Show each of the default layouts
+test_spacing=300;
+for (idx=[0:len(layouts)-1]) {
+	translate([test_spacing*(idx-len(layouts)/2+0.5),0,0]) {
+		layout = layouts[idx];
+		layout_name = layout[0];
+		translate([0,-100]) color("black") text(layout_name, 12, halign="center");
+		translate([0,-1000]) {
+			control_cluster(layout_name=layout_name, max_buttons=4);
+			color([0,0,1,1]) difference() {
+				translate([0,0,-20/2-0.1])
+					cube([test_spacing-25,225,20], center=true);
+				control_cluster(layout_name=layout_name, cutout=true, max_buttons=4);
+			}
+		}
+		translate([0,-750]) {
+			control_cluster(layout_name=layout_name, max_buttons=6);
+			color([0,0,1,1]) difference() {
+				translate([0,0,-20/2-0.1])
+					cube([test_spacing-25,225,20], center=true);
+				control_cluster(layout_name=layout_name, cutout=true, max_buttons=6);
+			}
+		}
+		translate([0,-500]) control_cluster(layout_name=layout_name);
+		translate([0,-250]) {
+			control_cluster(layout_name=layout_name);
+			color([0,0,1,1]) difference() {
+				translate([0,0,-20/2-0.1])
+					cube([test_spacing-25,225,20], center=true);
+				control_cluster(layout_name=layout_name, cutout=true);
+			}
+		}
+		translate([0,0]) {
+			control_cluster(layout_name=layout_name);
+			color([0,0,1,0.3]) difference() {
+				translate([0,0,-20/2-0.1])
+					cube([test_spacing-25,225,20], center=true);
+				control_cluster(layout_name=layout_name, cutout=true);
+			}
+		}
+		translate([0,250]) color([0,0,1,0.3]) difference() {
+			translate([0,0,-20/2-0.1])
+				cube([test_spacing-25,225,20], center=true);
+			control_cluster(layout_name=layout_name, cutout=true);
+		}
+		translate([0,500]) control_cluster(layout_name=layout_name, cutout=true);
+	}
+}

@@ -70,9 +70,9 @@ module panel_controls(width=default_width, depth=default_depth,
 	translate([0,curve_radius-depth+100,0]) {
 		for (p=player_config)
 			rotate([0,0,p[0]]) translate([0,-curve_radius,0])
-				button_pad(undermount=undermount,
+				control_cluster(undermount=undermount,
 				           cutout=cutout,
-				           count=p[1], color=p[2]);
+				           max_buttons=p[1], color=p[2]);
 	}
 
 	if (trackball)
