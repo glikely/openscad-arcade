@@ -104,7 +104,7 @@ player_config_5 = [[4, "red", "sega2"],
                    [6, "green", "sega2"],
                    [4, "yellow", "sega2"]];
 
-module panel_controls(size, r, cutout=false, start_spacing=120,
+module panel_controls(size, r, action="add", start_spacing=120,
                       start_colour="white", pc=player_config_4,
                       coin_spacing=50, trackball=true, undermount=0)
 {
@@ -117,12 +117,12 @@ module panel_controls(size, r, cutout=false, start_spacing=120,
 	translate([-start_spacing*(num_players-1)/2, -40, 0])
 		for (i=[0:num_players-1]) {
 			translate([start_spacing*i-coin_spacing/2,0,0]) {
-				button(color=start_colour, cutout=cutout);
+				button(color=start_colour, action=action);
 				translate([0,-40,0]) text("start", halign="center");
 			}
 			if (coin_spacing > 0) {
 				translate([start_spacing*i+coin_spacing/2,0,0]) {
-					button(color=pc[i][1], cutout=cutout);
+					button(color=pc[i][1], action=action);
 					translate([0,-40,0]) text("coin", halign="center");
 				}
 			}
@@ -136,20 +136,20 @@ module panel_controls(size, r, cutout=false, start_spacing=120,
 			translate([0,curve_origin,0]) rotate([0,0,offset*curve_angle])
 				translate([0,-r+100 ,0]) {
 					control_cluster(undermount=undermount,
-						   cutout=cutout,
+						   action=action,
 						   max_buttons=p[0], color=p[1], layout_name=p[2]);
 					// Guide lines
 					rotate([0,90,0]) square([1, r]);
 				}
 		} else {
 			translate([offset*spacing, -size[1]+100])
-				control_cluster(undermount=undermount, cutout=cutout,
+				control_cluster(undermount=undermount, action=action,
 						max_buttons=p[0], color=p[1]);
 		}
 	}
 
 	if (trackball)
-		translate([0,-size[1]+225,0]) utrak_trackball(cutout=cutout);
+		translate([0,-size[1]+225,0]) utrak_trackball(action=action);
 }
 
 /**
@@ -195,7 +195,7 @@ module panel(size=default_size, inset=default_inset, r=default_radius,
 	difference() {
 		panel_multilayer() panel_profile(size, inset, r=r);
 		panel_controls(size, r=r, pc=pc, trackball=trackball,
-		               undermount=plex_thick+0.1, cutout=true);
+		               undermount=plex_thick+0.1, action="remove");
 	}
 }
 

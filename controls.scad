@@ -2,7 +2,7 @@ include <materials.scad>
 
 undermount_depth = 3;
 
-module button(color="red", cutout=false) {
+module button(color="red", action="add") {
 	// Parameters
 	screw_diameter = 23.8;
 	screw_length = 31.2;
@@ -13,7 +13,7 @@ module button(color="red", cutout=false) {
 	switch_height = 18;
 
 	// The button model
-	if (!cutout) {
+	if (action=="add") {
 		color(color) {
 			translate([0,0,-screw_length])
 				cylinder(r=screw_diameter/2,h=screw_length);
@@ -38,21 +38,25 @@ module button(color="red", cutout=false) {
 		translate([0, 0, - (screw_length + switch_height/2 + 1)])
 			color(BlackPaint)
 				cube([switch_length, switch_width, switch_height], center = true);
-	} else union() {
+	} else if (action=="remove") {
 		// Dimensions for mounting hole. Right through all the layers
 		translate([0,0,-(screw_length+10)]) {
 			cylinder(r=28/2, h=screw_length+10+button_height);
 			cylinder(r=40/2, h=20); // contersink for nuts
 		}
+	} else if (action=="guide") {
+		rotate([90,0,0]) square([screw_diameter*1.2,1],center=true);
+		rotate([0,90,0]) square([1,screw_diameter*1.2],center=true);
+		circle(3);
 	}
 }
 
-module joystick(color="red", undermount=0, cutout=false) {
+module joystick(color="red", undermount=0, action="add") {
 	shaft_len = 27.5+31.8+3.9;
 	plate_width = 65;
 	plate_height = 97;
 
-	if (!cutout) {
+	if (action=="add") {
 		translate([0,0,-undermount]) {
 			// Ball top
 			color(color) {
@@ -70,7 +74,7 @@ module joystick(color="red", undermount=0, cutout=false) {
 		// Dust Cover Disc
 		color("black") cylinder(r=18, h=0.5);
 
-	} else translate([0,0,-undermount]) {
+	} else if (action=="remove") translate([0,0,-undermount]) {
 		// The cutouts for the joystick
 		// Mount place profile
 		translate([0,0,-2/2]) cube([plate_width+5, plate_height+5, 2], center=true);
@@ -79,10 +83,17 @@ module joystick(color="red", undermount=0, cutout=false) {
 
 		// Round hole for joystick shaft
 		translate([0,0,-2/2]) cylinder(r=10, h=10);
+	} else if (action=="guide") {
+		rotate([90,0,0]) square([32*1.2,1],center=true);
+		rotate([0,90,0]) square([1,32*1.2],center=true);
+		difference() {
+			circle(16);
+			circle(3);
+		}
 	}
 }
 
-module utrak_trackball(undermount=17, cutout=false)
+module utrak_trackball(undermount=17, action="add")
 {
 	box_width = 145;
 	box_height = 53;
@@ -95,7 +106,7 @@ module utrak_trackball(undermount=17, cutout=false)
 	flang_height = 2;
 	flang_radius = housing_radius + 5;
 
-	if (!cutout) translate([0,0,-undermount]){
+	if (action=="add") translate([0,0,-undermount]){
 		// Housing
 		color(BlackPaint) difference() {
 			translate([0,0,-box_height/2]) intersection() {
@@ -123,13 +134,20 @@ module utrak_trackball(undermount=17, cutout=false)
 		}
 		// Trackball
 		translate([0,0,0]) color([1,0,1,0.75]) sphere(3/2 * 25.4);
-	} else translate([0,0,-undermount-box_height/2]) {
+	} else if (action=="remove") translate([0,0,-undermount-box_height/2]) {
 		intersection() {
 			cube([box_width+5,box_width+5,box_height], center=true);
 			rotate([0,0,45])
 				cube([diag_width+5,diag_length+5,box_height+0.2], center=true);
 		}
 		cylinder(r=housing_radius, h=box_height + undermount);
+	} else if (action=="guide") {
+		rotate([90,0,0]) square([housing_radius*2.4,1],center=true);
+		rotate([0,90,0]) square([1,housing_radius*2.4],center=true);
+		difference() {
+			circle(housing_radius);
+			circle(3);
+		}
 	}
 }
 
@@ -161,24 +179,26 @@ layouts = [
 	               ["button", [100, -40], [110,0], [100,40]]]
 ];
 
-module control_cluster(color="red", undermount=0, layout_name="sega2", cutout=false, max_buttons=8) {
+module control_cluster(color="red", undermount=0, layout_name="sega2",
+                       action="add", max_buttons=8)
+{
 	layout = layouts[search([layout_name], layouts)[0]];
 
 	// Find and place list of buttons
 	btns=layout[search(["button"], layout)[0]];
 	for(p=[1:len(btns)-1])
 		if (p <= max_buttons)
-			translate(btns[p]) button(color, cutout=cutout); // 1st bottom
+			translate(btns[p]) button(color, action=action); // 1st bottom
 
 	// Find and place joysticks
 	joy=layout[search(["joystick"], layout)[0]];
 	for(p=[1:len(joy)-1])
-		translate(joy[p]) joystick(color, undermount=undermount, cutout=cutout);
+		translate(joy[p]) joystick(color, undermount=undermount, action=action);
 
 	// Find and place trackballs
 	track=layout[search(["utrak"], layout)[0]];
 	for(p=[1:len(track)-1])
-		translate(track[p]) utrak_trackball(cutout=cutout);
+		translate(track[p]) utrak_trackball(action=action);
 }
 
 // Demonstration code. Show each of the default layouts
@@ -193,7 +213,8 @@ for (idx=[0:len(layouts)-1]) {
 			color([0,0,1,1]) difference() {
 				translate([0,0,-20/2-0.1])
 					cube([test_spacing-25,225,20], center=true);
-				control_cluster(layout_name=layout_name, cutout=true, max_buttons=4);
+				control_cluster(layout_name=layout_name,
+				                action="remove", max_buttons=4);
 			}
 		}
 		translate([0,-750]) {
@@ -201,7 +222,8 @@ for (idx=[0:len(layouts)-1]) {
 			color([0,0,1,1]) difference() {
 				translate([0,0,-20/2-0.1])
 					cube([test_spacing-25,225,20], center=true);
-				control_cluster(layout_name=layout_name, cutout=true, max_buttons=6);
+				control_cluster(layout_name=layout_name,
+				                action="remove", max_buttons=6);
 			}
 		}
 		translate([0,-500]) control_cluster(layout_name=layout_name);
@@ -210,7 +232,8 @@ for (idx=[0:len(layouts)-1]) {
 			color([0,0,1,1]) difference() {
 				translate([0,0,-20/2-0.1])
 					cube([test_spacing-25,225,20], center=true);
-				control_cluster(layout_name=layout_name, cutout=true);
+				control_cluster(layout_name=layout_name,
+				                action="remove");
 			}
 		}
 		translate([0,0]) {
@@ -218,14 +241,20 @@ for (idx=[0:len(layouts)-1]) {
 			color([0,0,1,0.3]) difference() {
 				translate([0,0,-20/2-0.1])
 					cube([test_spacing-25,225,20], center=true);
-				control_cluster(layout_name=layout_name, cutout=true);
+				control_cluster(layout_name=layout_name,
+				                action="remove");
 			}
 		}
-		translate([0,250]) color([0,0,1,0.3]) difference() {
-			translate([0,0,-20/2-0.1])
-				cube([test_spacing-25,225,20], center=true);
-			control_cluster(layout_name=layout_name, cutout=true);
+		translate([0,250]) color([0,0,1,0.3]) {
+			control_cluster(layout_name=layout_name, action="guide");
+			difference() {
+				translate([0,0,-20/2-0.1])
+					cube([test_spacing-25,225,20], center=true);
+				control_cluster(layout_name=layout_name,
+				                action="remove");
+			}
 		}
-		translate([0,500]) control_cluster(layout_name=layout_name, cutout=true);
+		translate([0,500]) control_cluster(layout_name=layout_name,
+		                                   action="remove");
 	}
 }
