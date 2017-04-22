@@ -106,13 +106,13 @@ module utrak_trackball(undermount=17, action="add")
 	flang_height = 2;
 	flang_radius = housing_radius + 5;
 
-	if (action=="add") translate([0,0,-undermount]){
+	if (action=="add") translate([0,0,-undermount]) {
 		// Housing
 		color(BlackPaint) difference() {
-			translate([0,0,-box_height/2]) intersection() {
+			translate([0,0,-box_height/2-0.1]) intersection() {
 				cube([box_width,box_width,box_height], center=true);
 				rotate([0,0,45])
-					cube([diag_width,diag_length,box_height+0.2], center=true);
+					cube([diag_width,diag_length,box_height], center=true);
 			}
 			// Bolt holes
 			for (i=[0:3])
@@ -137,10 +137,15 @@ module utrak_trackball(undermount=17, action="add")
 	} else if (action=="remove") translate([0,0,-undermount-box_height/2]) {
 		intersection() {
 			cube([box_width+5,box_width+5,box_height], center=true);
-			rotate([0,0,45])
-				cube([diag_width+5,diag_length+5,box_height+0.2], center=true);
+			//rotate([0,0,45])
+				//cube([diag_width+5,diag_length+5,box_height], center=true);
 		}
 		cylinder(r=housing_radius, h=box_height + undermount);
+		// Bolt holes
+		for (i=[0:3])
+			rotate([0,0,45+90*i])
+				translate([hole_spacing/2,hole_spacing/2,0])
+					cylinder(r=hole_radius, h=box_height/2+undermount-2.1);
 	} else if (action=="guide") {
 		rotate([90,0,0]) square([housing_radius*2.4,1],center=true);
 		rotate([0,90,0]) square([1,housing_radius*2.4],center=true);
