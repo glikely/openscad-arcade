@@ -20,30 +20,21 @@ module corner_rounding(r)
 }
 
 /**
- * rounded_square() - 2D square module with rounded corners
+ * rounded_panel() - 2D square module with rounded corners
+ * keystone: Scaling factor for the size of the top edge to create a
+ *           keystone shape.
  */
-module rounded_square(size, r)
+module rounded_panel(size, r, keystone=1)
 {
-	difference() {
-		square(size);
-		if (r) {
-			translate([0,0]) corner_rounding(r);
-			translate([size[0],0]) corner_rounding(r);
-			translate([0,size[1]]) corner_rounding(r);
-			translate(size) corner_rounding(r);
-		}
-	}
-
-	/* Alternate implementation using hull() instead of trimming corners
+	delta = size[0]*(1 - keystone)/2;
 	if (r) hull() {
 		translate([r,r]) circle(r);
 		translate([size[0]-r,r]) circle(r);
-		translate([size[0]-r,size[1]-r]) circle(r);
-		translate([r,size[1]-r]) circle(r);
+		translate([size[0]-r-delta,size[1]-r]) circle(r);
+		translate([r+delta,size[1]-r]) circle(r);
 	} else {
 		square(size);
 	}
-	*/
 }
 
 /**
@@ -63,11 +54,11 @@ module panel_profile(size, inset, r, corner=10)
 	// Calculate the front and back edge locations of the centre section
 	back = inset ? inset[1] : 0;
 	front = r ? sqrt(pow(r-corner,2)-pow(size[0]/2-corner,2)) + corner - (r-size[1]) : size[1];
-	centre_size=[size[0], front-back];
+	keystone = r ? (back+(r-size[1]))/(front+(r-size[1])) : 1;
 
 	hull() {
 		translate([-size[0]/2,-front,0])
-			rounded_square(centre_size,corner);
+			rounded_panel([size[0],front-back],corner,keystone=keystone);
 
 		if (r) intersection() {
 			translate([0,r-size[1],0]) circle(r,$fa=2);
@@ -79,7 +70,7 @@ module panel_profile(size, inset, r, corner=10)
 	if (inset) {
 		// Inset part of the panel
 		translate([-inset[0]/2,-(inset[1]+corner),0])
-			rounded_square([inset[0], inset[1]+corner],corner);
+			rounded_panel([inset[0], inset[1]+corner],corner);
 
 		// Inside corner rounding between inset and center panel
 		translate([-inset[0]/2,-inset[1]]) corner_rounding(corner);
@@ -139,7 +130,8 @@ module panel_controls(size, r, action="add", start_spacing=120,
 						   action=action,
 						   max_buttons=p[0], color=p[1], layout_name=p[2]);
 					// Guide lines
-					rotate([0,90,0]) square([1, r]);
+					if (action=="guide")
+						rotate([0,90,0]) square([1, r]);
 				}
 		} else {
 			translate([offset*spacing, -size[1]+100])
@@ -149,7 +141,7 @@ module panel_controls(size, r, action="add", start_spacing=120,
 	}
 
 	if (trackball)
-		translate([0,-size[1]+225,0]) utrak_trackball(action=action);
+		translate([0,-size[1]+210,0]) utrak_trackball(action=action);
 }
 
 /**
@@ -186,14 +178,15 @@ default_radius = 1000;
  * r: (optional) Radius of curve used for front edge of control panel. Use undef
  *    or 0 for no curve.
  */
-module panel(size=default_size, inset=default_inset, r=default_radius,
+module panel(size=default_size, inset, r=default_radius,
              trackball, pc=player_config_4, show_controls=true)
 {
 	if (show_controls)
 		panel_controls(size, r=r, pc=pc, trackball=trackball,
 		               undermount=plex_thick+0.1);
 	difference() {
-		panel_multilayer() panel_profile(size, inset, r=r);
+		panel_multilayer()
+			panel_profile(size, inset, r=r);
 		panel_controls(size, r=r, pc=pc, trackball=trackball,
 		               undermount=plex_thick+0.1, action="remove");
 	}
@@ -203,7 +196,7 @@ test_radius=[0, 1000, 800];
 test_config=[
 	[player_config_1, [602,300], undef, false],
 	[player_config_2, [602,275], undef, false],
-	[player_config_2, [602,300], undef, true],
+	[player_config_2, [602,350], undef, true],
 	[player_config_3, default_size, default_inset, false],
 	[player_config_4, default_size, default_inset, false],
 	//[player_config_5, [1000,500], default_inset, false],
@@ -216,7 +209,7 @@ for (i=[0:len(test_radius)-1]) {
 		translate([xoff,yoff])
 			panel(size=test_config[j][1],inset=test_config[j][2],
 			      pc=test_config[j][0],trackball=test_config[j][3],
-			      r=test_radius[i],show_controls=(i==1 && j==1));
+			      r=test_radius[i],show_controls=(i==1 && j==2));
 	}
 }
 //projection(cut=true) translate([0,0,plex_thick/2]) panel();
