@@ -82,6 +82,9 @@ module panel_profile(size, inset, r, corner=10)
 player_config_1 = [[8, "red", "sega2"]];
 player_config_2 = [[6, "red", "sega2"],
                    [6, "blue", "sega2"]];
+player_config_2t =[[6, "red", "sega2"],
+                   [0, "purple", "trackball"],
+                   [6, "blue", "sega2"]];
 player_config_3 = [[6, "red", "sega2"],
                    [6, "blue", "sega2"],
                    [6, "yellow", "sega2"]];
@@ -89,19 +92,19 @@ player_config_4 = [[4, "red", "sega2"],
                    [6, "blue", "sega2"],
                    [6, "green", "sega2"],
                    [4, "yellow", "sega2"]];
-player_config_5 = [[4, "red", "sega2"],
+player_config_4t =[[4, "red", "sega2"],
                    [6, "blue", "sega2"],
-                   [6, "purple", "trackball3"],
+                   [6, "purple", "trackball"],
                    [6, "green", "sega2"],
                    [4, "yellow", "sega2"]];
 
 module panel_controls(size, r, action="add", start_spacing=120,
                       start_colour="white", pc=player_config_4,
-                      coin_spacing=50, trackball=true, undermount=0)
+                      coin_spacing=50, undermount=0)
 {
 	curve_origin=r-size[1];
 	num_players = len(pc);
-	spacing = (size[0]-50)/num_players;
+	spacing = (size[0]-150)/num_players;
 	curve_angle = asin((spacing/2)/(r-100))*2;
 
 	// Player Start buttons
@@ -127,8 +130,9 @@ module panel_controls(size, r, action="add", start_spacing=120,
 			translate([0,curve_origin,0]) rotate([0,0,offset*curve_angle])
 				translate([0,-r+100 ,0]) {
 					control_cluster(undermount=undermount,
-						   action=action,
-						   max_buttons=p[0], color=p[1], layout_name=p[2]);
+					                action=action,
+					                max_buttons=p[0], color=p[1],
+					                layout_name=p[2]);
 					// Guide lines
 					if (action=="guide")
 						rotate([0,90,0]) square([1, r]);
@@ -136,12 +140,10 @@ module panel_controls(size, r, action="add", start_spacing=120,
 		} else {
 			translate([offset*spacing, -size[1]+100])
 				control_cluster(undermount=undermount, action=action,
-						max_buttons=p[0], color=p[1]);
+						max_buttons=p[0], color=p[1],
+						layout_name=p[2]);
 		}
 	}
-
-	if (trackball)
-		translate([0,-size[1]+210,0]) utrak_trackball(action=action);
 }
 
 /**
@@ -179,27 +181,26 @@ default_radius = 1000;
  *    or 0 for no curve.
  */
 module panel(size=default_size, inset, r=default_radius,
-             trackball, pc=player_config_4, show_controls=true)
+             pc=player_config_4, show_controls=true)
 {
 	if (show_controls)
-		panel_controls(size, r=r, pc=pc, trackball=trackball,
-		               undermount=plex_thick+0.1);
+		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1);
 	difference() {
 		panel_multilayer()
 			panel_profile(size, inset, r=r);
-		panel_controls(size, r=r, pc=pc, trackball=trackball,
-		               undermount=plex_thick+0.1, action="remove");
+		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+		               action="remove");
 	}
 }
 
-test_radius=[0, 1000, 800];
+test_radius=[0, 2000, 1000];
 test_config=[
-	[player_config_1, [602,300], undef, false],
-	[player_config_2, [602,275], undef, false],
-	[player_config_2, [602,350], undef, true],
-	[player_config_3, default_size, default_inset, false],
-	[player_config_4, default_size, default_inset, false],
-	//[player_config_5, [1000,500], default_inset, false],
+	[player_config_1, [602,300], undef],
+	[player_config_2, [602,275], undef],
+	[player_config_2t, [650,300], undef],
+	[player_config_3, default_size, default_inset],
+	[player_config_4, default_size, default_inset],
+	//[player_config_4t, [1000,500], default_inset],
 ];
 
 for (i=[0:len(test_radius)-1]) {
