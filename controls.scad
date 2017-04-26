@@ -61,8 +61,9 @@ module button(color="red", action="add") {
 
 module joystick(color="red", undermount=0, action="add") {
 	shaft_len = 27.5+31.8+3.9;
-	plate_width = 65;
-	plate_height = 97;
+	plate = [65,97,1.6];
+	box = [60,55,31.8];
+	ears = [20,box[1]+12*2,10];
 
 	if (action=="add") {
 		translate([0,0,-undermount]) {
@@ -74,10 +75,13 @@ module joystick(color="red", undermount=0, action="add") {
 			color("silver") translate([0,0,-shaft_len+28]) cylinder(r=4, h=shaft_len);
 
 			// mounting plate
-			color("silver") translate([0,0,-2/2]) cube([plate_width, plate_height, 1.6], center=true);
+			color("silver") translate([0,0,-2/2]) cube(plate, center=true);
 
 			// Electronics box
-			color(BlackPaint) translate([0,0,-2-(31.8/2)]) cube([50,50,31.8], center=true);
+			color(BlackPaint) translate([0,0,-2-(box[2]/2)])
+				cube(box, center=true);
+			color(BlackPaint) translate([0,0,-2-(ears[2]/2)])
+				cube(ears, center=true);
 		}
 		// Dust Cover Disc
 		color("black") cylinder(r=18, h=0.5);
@@ -85,9 +89,12 @@ module joystick(color="red", undermount=0, action="add") {
 	} else if (action=="remove") translate([0,0,-undermount]) {
 		// The cutouts for the joystick
 		// Mount place profile
-		translate([0,0,-2/2]) cube([plate_width+5, plate_height+5, 2], center=true);
+		translate([0,0,-2/2]) cube([plate[0]+5, plate[1]+5, 2], center=true);
 		// Hole for the joystick box
-		translate([0,0,-(32/2 + 2)]) cube([55,55,32+1], center=true);
+		translate([0,0,-(box[2]/2 + 3)])
+			cube([box[0]+5,box[1]+5,box[2]+6], center=true);
+		translate([0,0,-(box[2]/2 + 3)])
+			cube([ears[0]+5,ears[1]+5,box[2]+6], center=true);
 
 		// Round hole for joystick shaft
 		translate([0,0,-2/2]) cylinder(r=10, h=10);
