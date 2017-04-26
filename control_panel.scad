@@ -208,6 +208,17 @@ module panel(size=default_size, inset, r=default_radius,
 	}
 }
 
+// Create manufacturing diagrams by slicing the panel multiple times
+module panel_drawings()
+{
+	slices = [plex_thick/2, plex_thick+0.3,
+	          plex_thick+mdf_thick/2, plex_thick+mdf_thick-0.1];
+
+	projection(cut=true) for (i=[0:len(slices)-1]) {
+		translate([900, (i+1)*500, slices[i]]) children();
+	}
+}
+
 test_radius=[0, 2000, 1000];
 test_config=[
 	[player_config_1, [602,300], undef],
@@ -228,6 +239,3 @@ for (i=[0:len(test_radius)-1]) {
 			      r=test_radius[i],show_controls=(i==1 && j==2));
 	}
 }
-//projection(cut=true) translate([0,0,plex_thick/2]) panel();
-//projection(cut=true) translate([0,0,plex_thick+0.3]) panel();
-//projection(cut=true) translate([0,0,plex_thick+mdf_thick]) panel();
