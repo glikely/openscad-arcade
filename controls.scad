@@ -8,9 +8,9 @@ module button(color="red", action="add") {
 	screw_length = 31.2;
 	button_diameter = 23.8;
 	button_height = 12.6;
-	switch_length = 6;
-	switch_width = 24;
-	switch_height = 18;
+	switch_size=[6,24,18];
+	fixingring_height = 10;
+	fixingring_diameter = 33;
 
 	// The button model
 	if (action=="add") {
@@ -35,14 +35,22 @@ module button(color="red", action="add") {
 			}
 		}
 
-		translate([0, 0, - (screw_length + switch_height/2 + 1)])
+		// Fixing Ring
+		color(BlackPaint) translate([0, 0, -screw_length]) difference() {
+			cylinder(r=fixingring_diameter/2, h=fixingring_height);
+			translate([0,0,-0.1])
+				cylinder(r=screw_diameter/2+0.1, h=fixingring_height+0.2);
+		}
+
+		translate([0, 0, - (screw_length + switch_size[2]/2 + 1)])
 			color(BlackPaint)
-				cube([switch_length, switch_width, switch_height], center = true);
+				cube(switch_size, center=true);
 	} else if (action=="remove") {
 		// Dimensions for mounting hole. Right through all the layers
+		// The +10 is to make sure the cut is all the way through the panel
 		translate([0,0,-(screw_length+10)]) {
 			cylinder(r=28/2, h=screw_length+10+button_height);
-			cylinder(r=40/2, h=20); // contersink for nuts
+			cylinder(r=(fixingring_diameter+5)/2, h=10+10); // countersink for fixing ring
 		}
 	} else if (action=="guide") {
 		rotate([90,0,0]) square([screw_diameter*1.2,1],center=true);
