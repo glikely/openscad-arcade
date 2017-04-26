@@ -27,8 +27,8 @@ module panel_box(angle, size, inset, r, pc)
 				translate([-inset[0]/2,-mdf_thick*1.5,0])
 					cube([inset[0], mdf_thick, size[2]]);
 			else
-				translate([-back_width/2+mdf_thick*1.5,-mdf_thick*1.5,0])
-					cube([back_width-mdf_thick*3, mdf_thick, size[2]]);
+				translate([-back_width/2+mdf_thick*0.5,-mdf_thick*1.5,0])
+					cube([back_width-mdf_thick*1, mdf_thick, size[2]]);
 			mirror_dup() {
 				if (inset) {
 					// Inset walls
@@ -39,10 +39,10 @@ module panel_box(angle, size, inset, r, pc)
 						cube([(back_width-inset[0])/2,mdf_thick,size[2]]);
 				}
 				// Side walls
-				if (r) translate([0, curve_origin, 0])
+				if (r) translate([10, curve_origin, 0])
 					rotate([0,0,-side_angle])
-						translate([mdf_thick/2, -r, 0])
-							cube([mdf_thick, r-inset_radius, size[2]]);
+						translate([0, mdf_thick/2-r, 0])
+							cube([mdf_thick, r-inset_radius-mdf_thick, size[2]]);
 				else translate([-(size[0]-mdf_thick)/2,-front_edge+mdf_thick/2,0])
 					cube([mdf_thick, front_edge-back_edge-mdf_thick, size[2]]);
 			}
