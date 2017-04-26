@@ -100,15 +100,16 @@ player_config_4t =[[4, "red", "sega2"],
 
 module panel_controls(size, r, action="add", start_spacing=120,
                       start_colour="white", pc=player_config_4,
-                      coin_spacing=50, undermount=0)
+                      coin_spacing=50, undermount=0, keepout_border=mdf_thick*1.5)
 {
+	// '250' is loosly the width of a single control cluster.
+	cluster_max_width=250;
+
 	curve_origin=r-size[1];
 	num_players = len(pc);
-	spacing = (size[0]-150)/num_players;
-	curve_angle = asin((spacing/2)/(r-100))*2;
 
 	// Player Start buttons
-	translate([-start_spacing*(num_players-1)/2, -40, 0])
+	translate([-start_spacing*(num_players-1)/2, -keepout_border - 30, 0])
 		for (i=[0:num_players-1]) {
 			translate([start_spacing*i-coin_spacing/2,0,0]) {
 				button(color=start_colour, action=action);
@@ -127,7 +128,16 @@ module panel_controls(size, r, action="add", start_spacing=120,
 		p = pc[idx];
 		offset = idx - (num_players-1)/2;
 		if (r) {
-			translate([0,curve_origin,0]) rotate([0,0,offset*curve_angle])
+			// Calculate the angle between control clusters, taking into
+			// account the total panel width (on the curve), keeping the
+			// clusters away from the sides, and the number of clusters
+			// to place
+			panel_arc = asin((size[0]/2)/r)*2;
+			arc_length = ((2*PI*(r-100))*(panel_arc/360)) - cluster_max_width;
+			arc_angle = 360 * arc_length/(2*PI*(r-100));
+			cluster_angle = num_players > 1 ? arc_angle/(num_players-1) : 0;
+
+			translate([0,curve_origin,0]) rotate([0,0,offset*cluster_angle])
 				translate([0,-r+100 ,0]) {
 					control_cluster(undermount=undermount,
 					                action=action,
@@ -138,10 +148,15 @@ module panel_controls(size, r, action="add", start_spacing=120,
 						rotate([0,90,0]) square([1, r]);
 				}
 		} else {
-			translate([offset*spacing, -size[1]+100])
+			placement_width = size[0] - cluster_max_width;
+			spacing = num_players > 1 ? placement_width/(num_players-1) : 0;
+			translate([offset*spacing, -size[1]+100]) {
 				control_cluster(undermount=undermount, action=action,
 						max_buttons=p[0], color=p[1],
 						layout_name=p[2]);
+				if (action=="guide")
+					rotate([0,90,0]) square([1, 200]);
+			}
 		}
 	}
 }
