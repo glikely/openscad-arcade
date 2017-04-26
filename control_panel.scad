@@ -162,14 +162,25 @@ module panel_controls(size, r, action="add", start_spacing=120,
 	}
 }
 
+module inset_profile(inset)
+{
+	minkowski() {
+		difference() {
+			square(10000, center=true);
+			children();
+		}
+		circle(inset);
+	}
+}
+
 /**
  * panel_multilayer(): construct a panel out of multiple layers
  * layers: Array of layer descriptions. Each layer is a nested array containing
  *         layer colour and layer thickness (mm).
  * i: (do not use) internal iteration variable
  */
-module panel_multilayer(layers=[[[0,0,1,.3], plex_thick],
-                                [FiberBoard, mdf_thick]], i=0)
+module panel_multilayer(layers=[[[0,0,1,.3], plex_thick, false],
+                                [FiberBoard, mdf_thick, true]], i=0)
 {
 	if (i < len(layers)) {
 		// Draw the bottom layers first on the assumption that the top
@@ -177,9 +188,18 @@ module panel_multilayer(layers=[[[0,0,1,.3], plex_thick],
 		// thing if transparent items are added last.
 		translate([0,0,-layers[i][1]-0.2])
 			panel_multilayer(layers, i+1) children();
-		// Add the layer
-		color(layers[i][0]) translate([0,0,-layers[i][1]])
-			linear_extrude(layers[i][1], convexity=10) children();
+
+		// Add t-moulding groove
+		color(layers[i][0]) difference() {
+			// Add the layer
+			translate([0,0,-layers[i][1]])
+				linear_extrude(layers[i][1], convexity=10) children();
+			if (layers[i][2] == true) {
+				translate([0,0,-layers[i][1]/2-1])
+					linear_extrude(2, convexity=10)
+						inset_profile(10) children();
+			}
+		}
 	}
 }
 
