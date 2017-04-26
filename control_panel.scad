@@ -100,10 +100,11 @@ player_config_4t =[[4, "red", "sega2"],
 
 module panel_controls(size, r, action="add", start_spacing=120,
                       start_colour="white", pc=player_config_4,
-                      coin_spacing=50, undermount=0, keepout_border=mdf_thick*1.5)
+                      coin_spacing=50, undermount=0, keepout_border=mdf_thick*1.5,
+                      cluster_ypos=125)
 {
 	// '250' is loosly the width of a single control cluster.
-	cluster_max_width=250;
+	cluster_max_width=275;
 
 	curve_origin=r-size[1];
 	num_players = len(pc);
@@ -113,12 +114,12 @@ module panel_controls(size, r, action="add", start_spacing=120,
 		for (i=[0:num_players-1]) {
 			translate([start_spacing*i-coin_spacing/2,0,0]) {
 				button(color=start_colour, action=action);
-				translate([0,-40,0]) text("start", halign="center");
+				translate([0,25,0]) text("start", halign="center");
 			}
 			if (coin_spacing > 0) {
 				translate([start_spacing*i+coin_spacing/2,0,0]) {
 					button(color=pc[i][1], action=action);
-					translate([0,-40,0]) text("coin", halign="center");
+					translate([0,25,0]) text("coin", halign="center");
 				}
 			}
 		}
@@ -133,12 +134,12 @@ module panel_controls(size, r, action="add", start_spacing=120,
 			// clusters away from the sides, and the number of clusters
 			// to place
 			panel_arc = asin((size[0]/2)/r)*2;
-			arc_length = ((2*PI*(r-100))*(panel_arc/360)) - cluster_max_width;
-			arc_angle = 360 * arc_length/(2*PI*(r-100));
+			arc_length = ((2*PI*(r-cluster_ypos))*(panel_arc/360)) - cluster_max_width;
+			arc_angle = 360 * arc_length/(2*PI*(r-cluster_ypos));
 			cluster_angle = num_players > 1 ? arc_angle/(num_players-1) : 0;
 
 			translate([0,curve_origin,0]) rotate([0,0,offset*cluster_angle])
-				translate([0,-r+100 ,0]) {
+				translate([0,-r+cluster_ypos ,0]) {
 					control_cluster(undermount=undermount,
 					                action=action,
 					                max_buttons=p[0], color=p[1],
@@ -150,7 +151,7 @@ module panel_controls(size, r, action="add", start_spacing=120,
 		} else {
 			placement_width = size[0] - cluster_max_width;
 			spacing = num_players > 1 ? placement_width/(num_players-1) : 0;
-			translate([offset*spacing, -size[1]+100]) {
+			translate([offset*spacing, -size[1]+cluster_ypos]) {
 				control_cluster(undermount=undermount, action=action,
 						max_buttons=p[0], color=p[1],
 						layout_name=p[2]);
@@ -184,7 +185,7 @@ module panel_multilayer(layers=[[[0,0,1,.3], plex_thick],
 
 // Default dimensions used for convenience in testing
 default_size = [900, 400];
-default_inset = [602, 150];
+default_inset = [602, 125];
 default_radius = 1000;
 
 /**
@@ -209,21 +210,21 @@ module panel(size=default_size, inset, r=default_radius,
 }
 
 // Create manufacturing diagrams by slicing the panel multiple times
-module panel_drawings()
+module panel_drawings(size)
 {
 	slices = [plex_thick/2, plex_thick+0.3,
 	          plex_thick+mdf_thick/2, plex_thick+mdf_thick-0.1];
 
 	projection(cut=true) for (i=[0:len(slices)-1]) {
-		translate([900, (i+1)*500, slices[i]]) children();
+		translate([size[0]/2+10, (i+1)*(size[1]+10), slices[i]]) children();
 	}
 }
 
 test_radius=[0, 2000, 1000];
 test_config=[
 	[player_config_1, [602,300], undef],
-	[player_config_2, [602,275], undef],
-	[player_config_2t, [650,300], undef],
+	[player_config_2, [602,300], undef],
+	[player_config_2t, [650,325], undef],
 	[player_config_3, default_size, default_inset],
 	[player_config_4, default_size, default_inset],
 	//[player_config_4t, [1000,500], default_inset],
