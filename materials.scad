@@ -1,6 +1,6 @@
 
 mdf_thick = 25.4 * 3 / 4;
-plex_thick = 2;
+plex_thick = 3;
 
 // Materials
 Oak = [0.65, 0.5, 0.4];

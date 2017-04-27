@@ -173,15 +173,19 @@ module inset_profile(inset)
 	}
 }
 
+default_layers = [
+	[[0,0,1,.3], plex_thick, false],
+	[FiberBoard, mdf_thick, true]
+];
 /**
  * panel_multilayer(): construct a panel out of multiple layers
  * layers: Array of layer descriptions. Each layer is a nested array containing
  *         layer colour and layer thickness (mm).
  * i: (do not use) internal iteration variable
  */
-module panel_multilayer(layers=[[[0,0,1,.3], plex_thick, false],
-                                [FiberBoard, mdf_thick, true]], i=0)
+module panel_multilayer(layers=default_layers, i=0)
 {
+	groove=[10,2]; // T-moulding groove depth & width
 	if (i < len(layers)) {
 		// Draw the bottom layers first on the assumption that the top
 		// layer will be transparent. OpenSCAD Preview shows the right
@@ -194,10 +198,10 @@ module panel_multilayer(layers=[[[0,0,1,.3], plex_thick, false],
 			// Add the layer
 			translate([0,0,-layers[i][1]])
 				linear_extrude(layers[i][1], convexity=10) children();
-			if (layers[i][2] == true) {
-				translate([0,0,-layers[i][1]/2-1])
-					linear_extrude(2, convexity=10)
-						inset_profile(10) children();
+			if (layers[i][2]) {
+				translate([0,0,-(layers[i][1]+groove[1])/2])
+					linear_extrude(groove[1], convexity=10)
+						inset_profile(groove[0]) children();
 			}
 		}
 	}
@@ -217,12 +221,12 @@ default_radius = 1000;
  *    or 0 for no curve.
  */
 module panel(size=default_size, inset, r=default_radius,
-             pc=player_config_4, show_controls=true)
+             pc=player_config_4, show_controls=true, layers=default_layers)
 {
 	if (show_controls)
 		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1);
 	difference() {
-		panel_multilayer()
+		panel_multilayer(layers=layers)
 			panel_profile(size, inset, r=r);
 		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
 		               action="remove");
@@ -240,6 +244,7 @@ module panel_drawings(size)
 	}
 }
 
+
 test_radius=[0, 2000, 1000];
 test_config=[
 	[player_config_1, [602,300], undef],
@@ -250,6 +255,12 @@ test_config=[
 	//[player_config_4t, [1000,500], default_inset],
 ];
 
+// Simpler layer setting for faster rendering.
+simple_layers = [
+	[FiberBoard, mdf_thick, false]
+];
+
+
 for (i=[0:len(test_radius)-1]) {
 	xoff = (i-(len(test_radius)-1)/2)*default_size[0]*1.2;
 	for (j=[0:len(test_config)-1]) {
@@ -257,6 +268,7 @@ for (i=[0:len(test_radius)-1]) {
 		translate([xoff,yoff])
 			panel(size=test_config[j][1],inset=test_config[j][2],
 			      pc=test_config[j][0],trackball=test_config[j][3],
-			      r=test_radius[i],show_controls=(i==1 && j==2));
+			      r=test_radius[i],show_controls=(i==1 && j==2),
+			      layers=(i==1&&j==2) ? default_layers : simple_layers);
 	}
 }
