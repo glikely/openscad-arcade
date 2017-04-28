@@ -1,5 +1,6 @@
 include <materials.scad>
 use <controls.scad>
+use <dimlines.scad>
 
 /**
  * corner_rounding() - Helper module for rounding square corners
@@ -155,8 +156,6 @@ module panel_controls(size, r, action="add", start_spacing=120,
 				control_cluster(undermount=undermount, action=action,
 						max_buttons=p[0], color=p[1],
 						layout_name=p[2]);
-				if (action=="guide")
-					rotate([0,90,0]) square([1, 200]);
 			}
 		}
 	}
@@ -223,24 +222,36 @@ default_radius = 1000;
 module panel(size=default_size, inset, r=default_radius,
              pc=player_config_4, show_controls=true, layers=default_layers)
 {
+	// Draw the controls first so that the if a transparent panel is used
+	// then the OpenSCAD preview will show the controls behind the panel
 	if (show_controls)
 		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1);
+	else
+		color("black")
+			panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+			               action="dimensions");
+
 	difference() {
 		panel_multilayer(layers=layers)
 			panel_profile(size, inset, r=r);
 		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
 		               action="remove");
 	}
+
 }
 
 // Create manufacturing diagrams by slicing the panel multiple times
 module panel_drawings(size)
 {
-	slices = [plex_thick/2, plex_thick+0.3,
-	          plex_thick+mdf_thick/2, plex_thick+mdf_thick-0.1];
+	slices = [plex_thick/2,			// Plexiglass top layer
+	          plex_thick+0.3,		// Top profile of MDF (inset cuts)
+	          plex_thick+mdf_thick/2,	// Middle of MDF (through hole cuts)
+	          plex_thick+mdf_thick-0.1];	// Bottom profile of MDF (inset cuts)
 
-	projection(cut=true) for (i=[0:len(slices)-1]) {
-		translate([size[0]/2+10, (i+1)*(size[1]+10), slices[i]]) children();
+	projection(cut=true) {
+		for (i=[0:len(slices)-1])
+			translate([size[0]/2+10, (i+1)*(size[1]+10), slices[i]])
+				children();
 	}
 }
 

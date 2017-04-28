@@ -1,4 +1,5 @@
 include <materials.scad>
+use <dimlines.scad>
 
 undermount_depth = 3;
 
@@ -52,10 +53,8 @@ module button(color="red", action="add") {
 			cylinder(r=28/2, h=screw_length+10+button_height);
 			cylinder(r=(fixingring_diameter+5)/2, h=10+10); // countersink for fixing ring
 		}
-	} else if (action=="guide") {
-		rotate([90,0,0]) square([screw_diameter*1.2,1],center=true);
-		rotate([0,90,0]) square([1,screw_diameter*1.2],center=true);
-		circle(3);
+	} else if (action=="dimensions") {
+		circle_center(radius=28/2);
 	}
 }
 
@@ -64,6 +63,7 @@ module joystick(color="red", undermount=0, action="add") {
 	plate = [65,97,1.6];
 	box = [60,55,31.8];
 	ears = [20,box[1]+12*2,10];
+	tophole_radius = 10;
 
 	if (action=="add") {
 		translate([0,0,-undermount]) {
@@ -97,15 +97,19 @@ module joystick(color="red", undermount=0, action="add") {
 			cube([ears[0]+5,ears[1]+5,box[2]+6], center=true);
 
 		// Round hole for joystick shaft
-		translate([0,0,-2/2]) cylinder(r=10, h=10);
-	} else if (action=="guide") {
-		rotate([90,0,0]) square([32*1.2,1],center=true);
-		rotate([0,90,0]) square([1,32*1.2],center=true);
-		difference() {
-			circle(16);
-			circle(3);
-		}
+		translate([0,0,-2/2]) cylinder(r=tophole_radius, h=10);
+	} else if (action=="dimensions") {
+		circle_center(radius=tophole_radius);
 	}
+}
+
+// utrak_mounts() - private utility for placing mounting holes
+module utrak_mounts(spacing = 81.32)
+{
+	d=sqrt(2*pow(spacing/2,2));
+	for (p=[[d,0],[-d,0],[0,d],[0,-d]])
+		translate(p)
+			children();
 }
 
 module utrak_trackball(undermount=17, action="add")
@@ -130,10 +134,9 @@ module utrak_trackball(undermount=17, action="add")
 					cube([diag_width,diag_length,box_height], center=true);
 			}
 			// Bolt holes
-			for (i=[0:3])
-				rotate([0,0,45+90*i])
-					translate([hole_spacing/2,hole_spacing/2,-box_height-0.1])
-						cylinder(r=hole_radius, h=box_height+0.2);
+			utrak_mounts()
+				translate([0,0,-box_height-0.1])
+					cylinder(r=hole_radius, h=box_height+0.2);
 		}
 		color(BlackPaint) difference() {
 			union() {
@@ -152,22 +155,21 @@ module utrak_trackball(undermount=17, action="add")
 	} else if (action=="remove") translate([0,0,-undermount-box_height/2]) {
 		intersection() {
 			cube([box_width+5,box_width+5,box_height], center=true);
+			// FIXME - The following two lines should be
+			// uncommented, but it confuses OpenSCAD. In the mean
+			// time leave it out and live with a larger than
+			// necessary inset profile
 			//rotate([0,0,45])
-				//cube([diag_width+5,diag_length+5,box_height], center=true);
+			//	cube([diag_width+5,diag_length+5,box_height], center=true);
 		}
 		cylinder(r=housing_radius, h=box_height + undermount);
 		// Bolt holes
-		for (i=[0:3])
-			rotate([0,0,45+90*i])
-				translate([hole_spacing/2,hole_spacing/2,0])
-					cylinder(r=hole_radius, h=box_height/2+undermount-2.1);
-	} else if (action=="guide") {
-		rotate([90,0,0]) square([housing_radius*2.4,1],center=true);
-		rotate([0,90,0]) square([1,housing_radius*2.4],center=true);
-		difference() {
-			circle(housing_radius);
-			circle(3);
-		}
+		utrak_mounts()
+			cylinder(r=hole_radius, h=box_height/2+undermount-2.1);
+	} else if (action=="dimensions") {
+		circle_center(housing_radius, size=housing_radius/4);
+		utrak_mounts()
+			circle_center(hole_radius);
 	}
 }
 
@@ -202,6 +204,7 @@ layouts = [
 module control_cluster(color="red", undermount=0, layout_name="sega2",
                        action="add", max_buttons=8)
 {
+	size=[200,100];
 	layout = layouts[search([layout_name], layouts)[0]];
 
 	// Find and place list of buttons
@@ -219,6 +222,17 @@ module control_cluster(color="red", undermount=0, layout_name="sega2",
 	track=layout[search(["utrak"], layout)[0]];
 	for(p=[1:len(track)-1])
 		translate(track[p]) utrak_trackball(action=action);
+
+	if (action=="dimensions") {
+		translate([-size[0]/2-10,size[1]/2])
+			line(size[0]+20);
+		translate([-size[0]/2-10,-size[1]/2])
+			line(size[0]+20);
+		translate([-size[0]/2,-size[1]/2-10])
+			rotate([0,0,90])line(size[1]+20);
+		translate([size[0]/2,-size[1]/2-10])
+			rotate([0,0,90])line(size[1]+20);
+	}
 }
 
 // Demonstration code. Show each of the default layouts
