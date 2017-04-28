@@ -226,11 +226,16 @@ module panel(size=default_size, inset, r=default_radius,
 	// then the OpenSCAD preview will show the controls behind the panel
 	if (show_controls)
 		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1);
-	else
-		color("black")
-			panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
-			               action="dimensions");
-
+	else color("black") {
+		// Draw placement lines when controls are left out
+		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+		               action="dimensions");
+		linear_extrude(0.01, convexity=10) intersection() {
+			panel_profile(size, inset, r=r);
+			inset_profile(0.25)
+				panel_profile(size, inset, r=r);
+		}
+	}
 	difference() {
 		panel_multilayer(layers=layers)
 			panel_profile(size, inset, r=r);
@@ -240,10 +245,11 @@ module panel(size=default_size, inset, r=default_radius,
 
 }
 
-// Create manufacturing diagrams by slicing the panel multiple times
+// Create manufacturing drawings by slicing the panel multiple times
 module panel_drawings(size)
 {
-	slices = [plex_thick/2,			// Plexiglass top layer
+	slices = [-0.01/2,			// Dimensional lines
+	          plex_thick/2,			// Plexiglass top layer
 	          plex_thick+0.3,		// Top profile of MDF (inset cuts)
 	          plex_thick+mdf_thick/2,	// Middle of MDF (through hole cuts)
 	          plex_thick+mdf_thick-0.1];	// Bottom profile of MDF (inset cuts)
