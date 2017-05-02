@@ -113,16 +113,11 @@ module panel_controls(size, r, action="add", start_spacing=120,
 	// Player Start buttons
 	translate([-start_spacing*(num_players-1)/2, -keepout_border - 30, 0])
 		for (i=[0:num_players-1]) {
-			translate([start_spacing*i-coin_spacing/2,0,0]) {
-				button(color=start_colour, action=action);
-				translate([0,25,0]) text("start", halign="center");
-			}
-			if (coin_spacing > 0) {
-				translate([start_spacing*i+coin_spacing/2,0,0]) {
-					button(color=pc[i][1], action=action);
-					translate([0,25,0]) text("coin", halign="center");
-				}
-			}
+			translate([start_spacing*i-coin_spacing/2,0,0])
+				button(color=start_colour, action=action, label="start");
+			if (coin_spacing > 0)
+				translate([start_spacing*i+coin_spacing/2,0,0])
+					button(color=pc[i][1], action=action, label="coin");
 		}
 
 	// Game Controls

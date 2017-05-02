@@ -3,7 +3,7 @@ use <dimlines.scad>
 
 undermount_depth = 3;
 
-module button(color="red", action="add") {
+module button(color="red", action="add", label) {
 	// Parameters
 	screw_diameter = 23.8;
 	screw_length = 31.2;
@@ -55,6 +55,8 @@ module button(color="red", action="add") {
 		}
 	} else if (action=="dimensions") {
 		circle_center(radius=28/2);
+		if (label)
+			translate([0,28/4,0]) text(label, valign="center", halign="center", size=5);
 	}
 }
 
