@@ -171,20 +171,22 @@ default_layers = [
 	[[0,0,1,.3], plex_thick, false],
 	[FiberBoard, mdf_thick, true]
 ];
+
 /**
- * panel_multilayer(): construct a panel out of multiple layers
+ * panel_multilayer() - construct a panel out of multiple layers
  * layers: Array of layer descriptions. Each layer is a nested array containing
  *         layer colour and layer thickness (mm).
  * i: (do not use) internal iteration variable
  */
 module panel_multilayer(layers=default_layers, i=0)
 {
+	layer_gap = 0.2;
 	groove=[10,2]; // T-moulding groove depth & width
 	if (i < len(layers)) {
 		// Draw the bottom layers first on the assumption that the top
 		// layer will be transparent. OpenSCAD Preview shows the right
 		// thing if transparent items are added last.
-		translate([0,0,-layers[i][1]-0.2])
+		translate([0,0,-layers[i][1]-layer_gap])
 			panel_multilayer(layers, i+1) children();
 
 		// Add t-moulding groove
