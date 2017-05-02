@@ -206,7 +206,7 @@ layouts = [
 module control_cluster(color="red", undermount=0, layout_name="sega2",
                        action="add", max_buttons=8)
 {
-	size=[200,100];
+	size=[200,125];
 	layout = layouts[search([layout_name], layouts)[0]];
 
 	// Find and place list of buttons
