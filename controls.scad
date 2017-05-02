@@ -60,9 +60,26 @@ module button(color="red", action="add", label) {
 	}
 }
 
-module joystick(color="red", undermount=0, action="add") {
+/**
+ * fourcorners() - Utility for mirroring all children across the x & y planes
+ *
+ * Assumes symetrical model
+ */
+module fourcorners()
+{
+	children();
+	mirror([1,0]) children();
+	mirror([0,1]) {
+		children();
+		mirror([1,0]) children();
+	}
+}
+
+module joystick(color="red", undermount=0, action="add")
+{
 	shaft_len = 27.5+31.8+3.9;
 	plate = [65,97,1.6];
+	boltholes = [22,41];
 	box = [60,55,31.8];
 	ears = [20,box[1]+12*2,10];
 	tophole_radius = 10;
@@ -77,7 +94,13 @@ module joystick(color="red", undermount=0, action="add") {
 			color("silver") translate([0,0,-shaft_len+28]) cylinder(r=4, h=shaft_len);
 
 			// mounting plate
-			color("silver") translate([0,0,-2/2]) cube(plate, center=true);
+			color("silver") translate([0,0,-2/2]) difference() {
+				cube(plate, center=true);
+				fourcorners() translate(boltholes) rotate([0,0,45]) hull() {
+					translate([0,-2,-1]) cylinder(r=3, h=plate.z*2);
+					translate([0, 2,-1]) cylinder(r=3, h=plate.z*2);
+				}
+			}
 
 			// Electronics box
 			color(BlackPaint) translate([0,0,-2-(box[2]/2)])
@@ -95,6 +118,9 @@ module joystick(color="red", undermount=0, action="add") {
 		// Hole for the joystick box
 		translate([0,0,-(box[2]/2 + 3)])
 			cube([box[0]+5,box[1]+5,box[2]+6], center=true);
+		// Mounting holes
+		translate([0,0,-(box[2] + 6)]) fourcorners()
+			translate([22,41]) cylinder(r=2, h=box[2]+6);
 		translate([0,0,-(box[2]/2 + 3)])
 			cube([ears[0]+5,ears[1]+5,box[2]+6], center=true);
 
@@ -102,6 +128,7 @@ module joystick(color="red", undermount=0, action="add") {
 		translate([0,0,-2/2]) cylinder(r=tophole_radius, h=10);
 	} else if (action=="dimensions") {
 		circle_center(radius=tophole_radius);
+		fourcorners() translate([22,41]) circle_center(radius=2);
 	}
 }
 
