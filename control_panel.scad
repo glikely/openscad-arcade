@@ -1,4 +1,5 @@
 include <materials.scad>
+use <utility.scad>
 use <controls.scad>
 use <dimlines.scad>
 
@@ -217,27 +218,31 @@ default_radius = 1000;
  *    or 0 for no curve.
  */
 module panel(size=default_size, inset, r=default_radius,
-             pc=player_config_4, show_controls=true, layers=default_layers)
+             pc=player_config_4, layers=default_layers,
+             action="full")
 {
 	// Draw the controls first so that the if a transparent panel is used
 	// then the OpenSCAD preview will show the controls behind the panel
-	if (show_controls)
+	if (action == "full")
 		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1);
-	else color("black") {
-		// Draw placement lines when controls are left out
+
+	// Draw placement guides
+	if (action == "dimensions") color("black") {
 		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
 		               action="dimensions");
-		linear_extrude(0.01, convexity=10) intersection() {
-			panel_profile(size, inset, r=r);
-			inset_profile(0.25)
-				panel_profile(size, inset, r=r);
-		}
+		cutlines()
+			translate([0,0,0.2])
+				panel(size, inset, r, pc, layers, action="add");
 	}
-	difference() {
-		panel_multilayer(layers=layers)
-			panel_profile(size, inset, r=r);
-		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
-		               action="remove");
+
+	// Carve the panel itself
+	if (action == "full" || action == "add") {
+		difference() {
+			panel_multilayer(layers=layers)
+				panel_profile(size, inset, r=r);
+			panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+			               action="remove");
+		}
 	}
 
 }
@@ -279,10 +284,11 @@ for (i=[0:len(test_radius)-1]) {
 	xoff = (i-(len(test_radius)-1)/2)*default_size[0]*1.2;
 	for (j=[0:len(test_config)-1]) {
 		yoff = (j-(len(test_config)-1)/2)*default_size[1]*1.4;
-		translate([xoff,yoff])
+		translate([xoff,yoff]) {
 			panel(size=test_config[j][1],inset=test_config[j][2],
 			      pc=test_config[j][0],trackball=test_config[j][3],
-			      r=test_radius[i],show_controls=(i==1 && j==2),
+			      r=test_radius[i],action=(i==1 && j==2) ? "full" : "add",
 			      layers=(i==1&&j==2) ? default_layers : simple_layers);
+		}
 	}
 }
