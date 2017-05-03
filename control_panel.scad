@@ -105,8 +105,9 @@ module panel_controls(size, r, action="add", start_spacing=120,
                       coin_spacing=50, undermount=0, keepout_border=mdf_thick*1.5,
                       cluster_ypos=125)
 {
-	// '250' is loosly the width of a single control cluster.
+	// '275' is loosely the width of a single control cluster.
 	cluster_max_width=275;
+	panel_arc = asin((size[0]/2)/r)*2;
 
 	curve_origin=r-size[1];
 	num_players = len(pc);
@@ -130,7 +131,6 @@ module panel_controls(size, r, action="add", start_spacing=120,
 			// account the total panel width (on the curve), keeping the
 			// clusters away from the sides, and the number of clusters
 			// to place
-			panel_arc = asin((size[0]/2)/r)*2;
 			arc_length = ((2*PI*(r-cluster_ypos))*(panel_arc/360)) - cluster_max_width;
 			arc_angle = 360 * arc_length/(2*PI*(r-cluster_ypos));
 			cluster_angle = num_players > 1 ? arc_angle/(num_players-1) : 0;
@@ -141,10 +141,11 @@ module panel_controls(size, r, action="add", start_spacing=120,
 					                action=action,
 					                max_buttons=p[0], color=p[1],
 					                layout_name=p[2]);
-					// Guide lines
-					if (action=="guide")
-						rotate([0,90,0]) square([1, r]);
 				}
+
+			if (action=="dimensions" && idx>0) translate([0,curve_origin])
+				rotate([0,0,(offset-0.5)*cluster_angle-90])
+					translate([curve_origin-10,0]) line(size[1]+20);
 		} else {
 			placement_width = size[0] - cluster_max_width;
 			spacing = num_players > 1 ? placement_width/(num_players-1) : 0;
@@ -153,6 +154,15 @@ module panel_controls(size, r, action="add", start_spacing=120,
 						max_buttons=p[0], color=p[1],
 						layout_name=p[2]);
 			}
+		}
+	}
+
+	if (action=="dimensions" && r) {
+		translate([0,curve_origin]) {
+			rotate([0,0,-90+panel_arc/2])
+				translate([curve_origin-10,0]) line(size[1]+20);
+			rotate([0,0,-90-panel_arc/2])
+				translate([curve_origin-10,0]) line(size[1]+20);
 		}
 	}
 }
