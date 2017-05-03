@@ -4,42 +4,6 @@ use <controls.scad>
 use <dimlines.scad>
 
 /**
- * corner_rounding() - Helper module for rounding square corners
- * r: Radius of corner rounding
- *
- * Can be used to produce rounded corners by taking difference with outside
- * corners, and taking union with inside corners.
- */
-module corner_rounding(r)
-{
-	if (r) difference() {
-		square([r*2,r*2], center=true);
-		translate([ r, r]) circle(r);
-		translate([-r, r]) circle(r);
-		translate([ r,-r]) circle(r);
-		translate([-r,-r]) circle(r);
-	}
-}
-
-/**
- * rounded_panel() - 2D square module with rounded corners
- * keystone: Scaling factor for the size of the top edge to create a
- *           keystone shape.
- */
-module rounded_panel(size, r, keystone=1)
-{
-	delta = size[0]*(1 - keystone)/2;
-	if (r) hull() {
-		translate([r,r]) circle(r);
-		translate([size[0]-r,r]) circle(r);
-		translate([size[0]-r-delta,size[1]-r]) circle(r);
-		translate([r+delta,size[1]-r]) circle(r);
-	} else {
-		square(size);
-	}
-}
-
-/**
  * panel_profile() - Creates a 2D outline of the control panel
  *
  * size: array of [width,height] describing the size of the panel
@@ -54,29 +18,31 @@ module rounded_panel(size, r, keystone=1)
 module panel_profile(size, inset, r, corner=10)
 {
 	// Calculate the front and back edge locations of the centre section
+	curve_origin=r-size[1];
 	back = inset ? inset[1] : 0;
-	front = r ? sqrt(pow(r-corner,2)-pow(size[0]/2-corner,2)) + corner - (r-size[1]) : size[1];
-	keystone = r ? (back+(r-size[1]))/(front+(r-size[1])) : 1;
+	front = r ? sqrt(pow(r,2)-pow(size[0]/2,2)) - curve_origin : size[1];
+	keystone = r ? (back+curve_origin)/(front+curve_origin) : 1;
+	delta = r ? (size[0]/2)*(1 - (back+curve_origin)/(front+curve_origin)) : 0;
 
-	hull() {
-		translate([-size[0]/2,-front,0])
-			rounded_panel([size[0],front-back],corner,keystone=keystone);
+	round_corners(corner)
+	{
+		// Main block of panel. Might be trapezoidal
+		polygon ([[-size[0]/2,-front], [size[0]/2,-front],
+		          [size[0]/2-delta,-back], [-size[0]/2+delta,-back]]);
 
+		// Optional curved front
 		if (r) intersection() {
-			translate([0,r-size[1],0]) circle(r,$fa=2);
-			translate([-size[0]/2+corner, -size[1]])
-				square([size[0]-corner*2,size[1]-front+5]);
+			translate([0,curve_origin,0]) circle(r,$fa=2);
+			translate([-size[0]/2, -size[1]])
+				square([size[0],size[1]-front+0.1]);
 		}
-	}
 
-	if (inset) {
-		// Inset part of the panel
-		translate([-inset[0]/2,-(inset[1]+corner),0])
-			rounded_panel([inset[0], inset[1]+corner],corner);
-
-		// Inside corner rounding between inset and center panel
-		translate([-inset[0]/2,-inset[1]]) corner_rounding(corner);
-		translate([ inset[0]/2,-inset[1]]) corner_rounding(corner);
+		// Optional inset
+		if (inset) {
+			// Inset part of the panel
+			translate([-inset[0]/2,-inset[1]-0.1,0])
+				square([inset[0],inset[1]+0.1]);
+		}
 	}
 }
 

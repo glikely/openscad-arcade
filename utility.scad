@@ -17,3 +17,19 @@ module cutlines(line_width=0.25)
 	}
 }
 
+/**
+ * round_corners() - Given a 2D shape, round off the corners to a given radius
+ * r: radius of corner rounding.
+ *
+ * Rounds off the corners of a 2D shape by creating use of offsets. The
+ * modifier first trims a depth of 'r' off all edges, then adds r*2 to get
+ * rounding on the convex corners. Finally, it trims the edges again by 'r' to
+ * round the concave corners.
+ *
+ * Note: any cutout or segment narrower than 2*r will disappear when this modifier
+ * is appiled
+ */
+module round_corners(r)
+{
+	offset(r=-r) offset(r=r*2) offset(delta=-r) children();
+}
