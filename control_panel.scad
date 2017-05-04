@@ -15,7 +15,7 @@ use <dimlines.scad>
  *         and limitations of manufacturing process (ie. when using
  *         router to cut out the panel.
  */
-module panel_profile(size, inset, r, corner=10)
+module panel_profile(size, inset, r, corner=10, action="profile")
 {
 	// Calculate the front and back edge locations of the centre section
 	curve_origin=r-size[1];
@@ -24,8 +24,7 @@ module panel_profile(size, inset, r, corner=10)
 	keystone = r ? (back+curve_origin)/(front+curve_origin) : 1;
 	delta = r ? (size[0]/2)*(1 - (back+curve_origin)/(front+curve_origin)) : 0;
 
-	round_corners(corner)
-	{
+	if (action == "profile") round_corners(corner) {
 		// Main block of panel. Might be trapezoidal
 		polygon ([[-size[0]/2,-front], [size[0]/2,-front],
 		          [size[0]/2-delta,-back], [-size[0]/2+delta,-back]]);
@@ -43,6 +42,50 @@ module panel_profile(size, inset, r, corner=10)
 			translate([-inset[0]/2,-inset[1]-0.1,0])
 				square([inset[0],inset[1]+0.1]);
 		}
+	}
+
+	if (action == "dimensions") {
+		// Angled Corners
+		if (r) {
+			panel_arc = asin((size[0]/2)/r)*2;
+			mirror_dup([1,0,0]) {
+				translate([0,curve_origin]) rotate([0,0,-90+panel_arc/2]) {
+					translate([r,0]) {
+						translate([-5,0]) line(18);
+						rotate([0,0,90]) translate([-5,0])
+							line(18);
+					}
+					translate([(size.x/2-delta)/sin(panel_arc/2)-10,0])
+						line(13);
+				}
+				translate([size.x/2-delta-3, 0]) line(13);
+			}
+		}
+
+		// Full panel width
+		mirror_dup([1,0])
+			translate([size.x/2,-size.y-25])
+				rotate([0,0,90]) line(size.y-front+25);
+		translate([-size.x/2,-size.y-20]) dimensions(size.x);
+		// Angled panel width
+		if (delta) {
+			mirror_dup([1,0]) translate([size.x/2-delta,0])
+				rotate([0,0,90]) line(25);
+			translate([-size.x/2+delta,20])
+				dimensions(size.x-delta*2);
+		}
+
+		// Full panel height
+		if (r) {
+			translate([size.x/2+5,-front]) line(25);
+			translate([size.x/4,-size.y]) line(size.x/4+50);
+			translate([size.x/2+25,-front]) rotate([0,0,90])
+				dimensions(front);
+		} else {
+		}
+		translate([size.x/2-delta,0]) line(delta+50);
+		translate([size.x/2,-size.y]) line(50);
+		translate([size.x/2+45,-size.y]) rotate([0,0,90]) dimensions(size.y);
 	}
 }
 
@@ -120,15 +163,6 @@ module panel_controls(size, r, action="add", start_spacing=120,
 						max_buttons=p[0], color=p[1],
 						layout_name=p[2]);
 			}
-		}
-	}
-
-	if (action=="dimensions" && r) {
-		translate([0,curve_origin]) {
-			rotate([0,0,-90+panel_arc/2])
-				translate([curve_origin-10,0]) line(size[1]+20);
-			rotate([0,0,-90-panel_arc/2])
-				translate([curve_origin-10,0]) line(size[1]+20);
 		}
 	}
 }
@@ -209,6 +243,7 @@ module panel(size=default_size, inset, r=default_radius,
 		cutlines()
 			translate([0,0,0.2])
 				panel(size, inset, r, pc, layers, action="add");
+		panel_profile(size, inset, r=r, action="dimensions");
 	}
 
 	// Carve the panel itself
