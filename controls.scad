@@ -1,5 +1,6 @@
 include <materials.scad>
 use <dimlines.scad>
+use <utility.scad>
 
 undermount_depth = 3;
 
@@ -57,21 +58,6 @@ module button(color="red", action="add", label) {
 		circle_center(radius=28/2);
 		if (label)
 			translate([0,28/4,0]) text(label, valign="center", halign="center", size=5);
-	}
-}
-
-/**
- * fourcorners() - Utility for mirroring all children across the x & y planes
- *
- * Assumes symetrical model
- */
-module fourcorners()
-{
-	children();
-	mirror([1,0]) children();
-	mirror([0,1]) {
-		children();
-		mirror([1,0]) children();
 	}
 }
 

@@ -1,11 +1,6 @@
 include <materials.scad>
 use <control_panel.scad>
-
-module mirror_dup()
-{
-	children();
-	mirror([1,0,0]) children();
-}
+use <utility.scad>
 
 module panel_box(angle, size, inset, r, pc)
 {
@@ -29,7 +24,7 @@ module panel_box(angle, size, inset, r, pc)
 			else
 				translate([-back_width/2+mdf_thick*0.5,-mdf_thick*1.5,0])
 					cube([back_width-mdf_thick*1, mdf_thick, size[2]]);
-			mirror_dup() {
+			mirror_dup([1,0,0]) {
 				if (inset) {
 					// Inset walls
 					translate([-inset[0]/2,-inset[1]-(mdf_thick*1.5),0])

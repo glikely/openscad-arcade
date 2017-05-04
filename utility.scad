@@ -33,3 +33,29 @@ module round_corners(r)
 {
 	offset(r=-r) offset(r=r*2) offset(delta=-r) children();
 }
+
+/**
+ * mirror_dup() - Place children twice, applying mirror() to one copy
+ * v: vector of mirror plane
+ *
+ * Place two copies of children(). One unmodified, and one after applying the
+ * mirror() modifier.
+ */
+module mirror_dup(v)
+{
+	children();
+	mirror(v)
+		children();
+}
+
+/**
+ * fourcorners() - Utility for mirroring all children across the x & y planes
+ *
+ * Places 4 copies of children, mirrored across the x and y axies.
+ */
+module fourcorners()
+{
+	mirror_dup([0,1])
+		mirror_dup([1,0])
+			children();
+}
