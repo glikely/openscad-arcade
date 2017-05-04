@@ -201,6 +201,12 @@ module circle_center(radius, size=DIM_HOLE_CENTER, line_width=DIM_LINE_WIDTH) {
 
 }
 
+module dimtext(t, s=1)
+{
+	scale([DIM_FONTSCALE * s, DIM_FONTSCALE * s, DIM_FONTSCALE * s])
+		linear_extrude(DIM_HEIGHT, convexity=10) text(t);
+}
+
 function text_or_length(length, mytext) = (len(mytext) == 0)
     ? str(length): mytext;
 
@@ -213,8 +219,7 @@ module dimensions(length, line_width=DIM_LINE_WIDTH, loc=DIM_CENTER,
         line(length=length / 2 - space / 2, width=line_width, height=DIM_HEIGHT,
              left_arrow=true, right_arrow=false);
         translate([(length) / 2 - space / 2 * .9, -DIM_FONTSCALE * 3, 0])
-        scale([DIM_FONTSCALE, DIM_FONTSCALE, DIM_FONTSCALE])
-        text(text_or_length(length, mytext));
+        dimtext(text_or_length(length, mytext));
 
         translate([length / 2 + space / 2, 0, 0])
         line(length=length / 2 - space / 2, width=line_width, height=DIM_HEIGHT,
@@ -226,16 +231,14 @@ module dimensions(length, line_width=DIM_LINE_WIDTH, loc=DIM_CENTER,
                  left_arrow=true, right_arrow=true);
 
             translate([-space, -DIM_FONTSCALE * 3, 0])
-            scale([DIM_FONTSCALE, DIM_FONTSCALE, DIM_FONTSCALE])
-            text(text_or_length(length, mytext));
+            dimtext(text_or_length(length, mytext));
         } else {
             if (loc == DIM_RIGHT) {
                 line(length=length, width=line_width, height=DIM_HEIGHT,
                      left_arrow=true, right_arrow=true);
 
                 translate([length + space, -DIM_FONTSCALE * 3, 0])
-                scale([DIM_FONTSCALE, DIM_FONTSCALE, DIM_FONTSCALE])
-                text(text_or_length(length, mytext));
+                dimtext(text_or_length(length, mytext));
             } else {
                 if (loc == DIM_OUTSIDE) {
 
@@ -245,8 +248,7 @@ module dimensions(length, line_width=DIM_LINE_WIDTH, loc=DIM_CENTER,
 
                     translate([(length) / 2 - space / 2 * .9,
                               -DIM_FONTSCALE * 3, 0])
-                    scale([DIM_FONTSCALE, DIM_FONTSCALE, DIM_FONTSCALE])
-                    text(text_or_length(length, mytext));
+                    dimtext(text_or_length(length, mytext));
 
                     translate([length, 0, 0])
                     line(length=length / 2, width=line_width, height=DIM_HEIGHT,
@@ -285,8 +287,7 @@ module leader_line(angle, radius, angle_length, horz_line_length,
                  left_arrow=false, right_arrow=false);
 
             translate([(horz_line_length + space), -DIM_FONTSCALE * 3,  0])
-            scale([DIM_FONTSCALE, DIM_FONTSCALE, DIM_FONTSCALE])
-            text(text);
+            dimtext(text);
 
             if (do_circle) {
                 translate([(horz_line_length + space + text_length/2),
@@ -307,8 +308,7 @@ module leader_line(angle, radius, angle_length, horz_line_length,
             translate([-(horz_line_length + space + text_length),
                       -DIM_FONTSCALE * 3,
                       0])
-            scale([DIM_FONTSCALE, DIM_FONTSCALE, DIM_FONTSCALE])
-            text(text);
+            dimtext(text);
 
         }
     }
@@ -361,13 +361,9 @@ module titleblock(lines, descs, details) {
         translate([line[0] * DIM_LINE_WIDTH, line[1] * DIM_LINE_WIDTH, 0])
         if (line[2] == DIM_VERT) {
             rotate([0, 0, 90])
-            scale([DIM_FONTSCALE * line[4], DIM_FONTSCALE * line[4],
-                  DIM_FONTSCALE * line[4]])
-            text(line[3]);
+            dimtext(line[3], s=line[4]);
         } else {
-            scale([DIM_FONTSCALE * line[4], DIM_FONTSCALE * line[4],
-                  DIM_FONTSCALE * line[4]])
-            text(line[3]);
+            dimtext(line[3], s=line[4]);
         }
     }
 
@@ -375,13 +371,9 @@ module titleblock(lines, descs, details) {
         translate([line[0] * DIM_LINE_WIDTH, line[1] * DIM_LINE_WIDTH, 0])
         if (line[2] == DIM_VERT) {
             rotate([0, 0, 90])
-            scale([DIM_FONTSCALE * line[4], DIM_FONTSCALE * line[4],
-                  DIM_FONTSCALE * line[4]])
-            text(line[3]);
+            dimtext(line[3], s=line[4]);
         } else {
-            scale([DIM_FONTSCALE * line[4], DIM_FONTSCALE * line[4],
-                  DIM_FONTSCALE * line[4]])
-            text(line[3]);
+            dimtext(line[3], s=line[4]);
         }
     }
 
@@ -548,8 +540,7 @@ module sample_revisionblock(revisions) {
             for (col = [0:2]) {
                 translate([(cols[col] + desc_x) * DIM_LINE_WIDTH,
                     ((row + 1) * row_height + desc_y) * DIM_LINE_WIDTH, 0])
-                scale([DIM_FONTSCALE, DIM_FONTSCALE, DIM_FONTSCALE])
-                text(revisions[row][col]);
+                dimtext(revisions[row][col]);
             }
         }
 
