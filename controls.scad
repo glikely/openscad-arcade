@@ -56,8 +56,8 @@ module button(color="red", action="add", label) {
 		}
 	} else if (action=="dimensions") {
 		circle_center(radius=28/2);
-		if (label) translate([0,28/4,0])
-			dimtext(label, valign="center", halign="center", size=5);
+		if (label) translate([0,28/4,0]) scale_text()
+			text(label, size=15, valign="center", halign="center");
 	}
 }
 
@@ -256,8 +256,8 @@ for (idx=[0:len(layouts)-1]) {
 	translate([test_spacing*(idx-len(layouts)/2+0.5),0,0]) {
 		layout = layouts[idx];
 		layout_name = layout[0];
-		translate([0,-100]) color("black")
-			dimtext(layout_name, 12, halign="center");
+		translate([0,-100]) color("black") scale_text()
+			text(layout_name, halign="center");
 		translate([0,-1000]) {
 			control_cluster(layout_name=layout_name, max_buttons=4);
 			color([0,0,1,1]) difference() {
