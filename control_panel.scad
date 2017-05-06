@@ -179,8 +179,10 @@ module inset_profile(inset)
 }
 
 default_layers = [
-	[[0,0,1,.3], plex_thick, false],
-	[FiberBoard, mdf_thick, true]
+	[[0,0,1,.3], plex_thick, 0],
+	[FiberBoard, 6, 0],
+	[FiberBoard, 3, -10],
+	[FiberBoard, 6, 0],
 ];
 
 /**
@@ -191,8 +193,7 @@ default_layers = [
  */
 module panel_multilayer(layers=default_layers, i=0)
 {
-	layer_gap = 0.2;
-	groove=[10,2]; // T-moulding groove depth & width
+	layer_gap = 0.01;
 	if (i < len(layers)) {
 		// Draw the bottom layers first on the assumption that the top
 		// layer will be transparent. OpenSCAD Preview shows the right
@@ -200,19 +201,30 @@ module panel_multilayer(layers=default_layers, i=0)
 		translate([0,0,-layers[i][1]-layer_gap])
 			panel_multilayer(layers, i+1) children();
 
-		// Add t-moulding groove
-		color(layers[i][0]) difference() {
-			// Add the layer
-			translate([0,0,-layers[i][1]])
-				linear_extrude(layers[i][1], convexity=10) children();
-			if (layers[i][2]) {
-				translate([0,0,-(layers[i][1]+groove[1])/2])
-					linear_extrude(groove[1], convexity=10)
-						inset_profile(groove[0]) children();
-			}
-		}
+		// Add the layer
+		color(layers[i][0]) translate([0,0,-layers[i][1]])
+			linear_extrude(layers[i][1], convexity=10)
+				offset(r=layers[i][2])
+					children();
 	}
 }
+
+// Create manufacturing drawings by slicing the panel multiple times
+module lasercut(size, layers, i=0)
+{
+	layer_gap = 0.01;
+	if (i < len(layers)) {
+		// This layer
+		translate([size.x/2, size.y, 0.1])
+			children();
+
+		// Next layer
+		translate([0, size.y+20, layers[i][1]+layer_gap])
+			lasercut(size, layers, i+1)
+				children();
+	}
+}
+
 
 // Default dimensions used for convenience in testing
 default_size = [900, 400];
@@ -246,6 +258,26 @@ module panel(size=default_size, inset, r=default_radius,
 		panel_profile(size, inset, r=r, action="dimensions");
 	}
 
+	if (action == "drawings") projection() {
+		pagesize = paper_sizes[search(["A1"], paper_sizes)[0]][1];
+		margin = 20;
+
+		translate([pagesize.x/2, pagesize.y/2 + size.y/2])
+			panel(size, inset=inset, r=r, pc=pc, layers=layers,
+			      action="dimensions");
+
+		translate([margin, margin]) line(pagesize.x - margin * 2);
+		translate([margin, pagesize.y - margin]) line(pagesize.x - margin * 2);
+		translate([margin, margin])
+			rotate([0,0,90]) line(pagesize.y - margin * 2);
+		translate([pagesize.x - margin, margin])
+			rotate([0,0,90]) line(pagesize.y - margin * 2);
+	}
+
+	if (action == "lasercut")
+		projection(cut=true) lasercut(size, layers)
+			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
+
 	// Carve the panel itself
 	if (action == "full" || action == "add") {
 		difference() {
@@ -257,23 +289,6 @@ module panel(size=default_size, inset, r=default_radius,
 	}
 
 }
-
-// Create manufacturing drawings by slicing the panel multiple times
-module panel_drawings(size)
-{
-	slices = [-0.01/2,			// Dimensional lines
-	          plex_thick/2,			// Plexiglass top layer
-	          plex_thick+0.3,		// Top profile of MDF (inset cuts)
-	          plex_thick+mdf_thick/2,	// Middle of MDF (through hole cuts)
-	          plex_thick+mdf_thick-0.1];	// Bottom profile of MDF (inset cuts)
-
-	projection(cut=true) {
-		for (i=[0:len(slices)-1])
-			translate([size[0]/2+10, (i+1)*(size[1]+10), slices[i]])
-				children();
-	}
-}
-
 
 test_radius=[0, 2000, 1000];
 test_config=[
@@ -287,7 +302,7 @@ test_config=[
 
 // Simpler layer setting for faster rendering.
 simple_layers = [
-	[FiberBoard, mdf_thick, false]
+	[FiberBoard, mdf_thick, 0]
 ];
 
 
