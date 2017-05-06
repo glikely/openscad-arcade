@@ -103,7 +103,7 @@ DIM_LOWER_RIGHT = 3;
  * part.
  */
 
-DIM_FONTSIZE = 2.5;
+DIM_FONTSIZE = 4;
 
 // an approximation that sets the line widths relative to the font size
 DIM_LINE_WIDTH = DIM_FONTSIZE / 7; // width of dimension lines
