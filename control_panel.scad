@@ -111,7 +111,7 @@ player_config_4t =[[4, "red", "sega2"],
 
 module panel_controls(size, r, action="add", start_spacing=120,
                       start_colour="white", pc=player_config_4,
-                      coin_spacing=50, undermount=0, keepout_border=mdf_thick*1.5,
+                      coin_spacing=40, undermount=0, keepout_border=mdf_thick*1.5,
                       cluster_ypos=125)
 {
 	// '275' is loosely the width of a single control cluster.
@@ -122,7 +122,7 @@ module panel_controls(size, r, action="add", start_spacing=120,
 	num_players = len(pc);
 
 	// Player Start buttons
-	translate([-start_spacing*(num_players-1)/2, -keepout_border - 30, 0])
+	translate([-start_spacing*(num_players-1)/2, -keepout_border - 15, 0])
 		for (i=[0:num_players-1]) {
 			translate([start_spacing*i-coin_spacing/2,0,0])
 				button(color=start_colour, action=action, label="start");
