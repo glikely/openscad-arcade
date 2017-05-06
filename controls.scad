@@ -68,7 +68,7 @@ module joystick(color="red", undermount=0, action="add")
 	boltholes = [22,41];
 	box = [60,55,31.8];
 	ears = [20,box[1]+12*2,10];
-	tophole_radius = 10;
+	tophole_radius = 11;
 
 	if (action=="add") {
 		translate([0,0,-undermount]) {
