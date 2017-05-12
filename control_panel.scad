@@ -210,18 +210,25 @@ module panel_multilayer(layers=default_layers, i=0)
 }
 
 // Create manufacturing drawings by slicing the panel multiple times
-module lasercut(size, layers, i=0)
+module lasercut(size, layers, filter, i=0)
 {
 	layer_gap = 0.01;
 	if (i < len(layers)) {
 		// This layer
-		translate([size.x/2, size.y, 0.1])
-			children();
-
-		// Next layer
-		translate([0, size.y+20, layers[i][1]+layer_gap])
-			lasercut(size, layers, i+1)
+		if (filter[i]) {
+			translate([size.x/2, 0, 0.1])
 				children();
+
+			// Next layer
+			translate([0, -size.y-20, layers[i][1]+layer_gap])
+				lasercut(size, layers, filter, i+1)
+					children();
+		} else {
+			// Next layer
+			translate([0, 0, layers[i][1]+layer_gap])
+				lasercut(size, layers, filter, i+1)
+					children();
+		}
 	}
 }
 
@@ -274,8 +281,15 @@ module panel(size=default_size, inset, r=default_radius,
 			rotate([0,0,90]) line(pagesize.y - margin * 2);
 	}
 
-	if (action == "lasercut")
-		projection(cut=true) lasercut(size, layers)
+	if (action == "lasercut-6mm")
+		projection(cut=true) rotate([0,0,90])
+			lasercut(size, layers, [false,true,false,true])
+			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
+	if (action == "lasercut-3mm")
+		projection(cut=true) rotate([0,0,90]) lasercut(size, layers, [false,false,true,false])
+			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
+	if (action == "lasercut-plex")
+		projection(cut=true) rotate([0,0,90]) lasercut(size, layers, [true, false,false,false])
 			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
 
 	// Carve the panel itself
