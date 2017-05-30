@@ -31,6 +31,8 @@ module panel_profile(size, inset, r, corner=10, action="profile")
 
 		// Optional curved front
 		if (r) intersection() {
+			panel_arc = asin((size[0]/2)/r)*2;
+			echo(str("Panel Arc: ", panel_arc, "°"));
 			translate([0,curve_origin,0]) circle(r,$fa=2);
 			translate([-size[0]/2, -size[1]])
 				square([size[0],size[1]-front+0.1]);
@@ -291,6 +293,15 @@ module panel(size=default_size, inset, r=default_radius,
 	if (action == "lasercut-plex")
 		projection(cut=true) rotate([0,0,90]) lasercut(size, layers, [true, false,false,false])
 			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
+	if (action == "vinyl") {
+		projection(cut=true) lasercut(size, layers, [true, false,false,false])
+			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
+
+		mirror_dup([1,0]) translate([0,-size.y-50]) {
+			polygon([[-1,0],[584/2,0],[584/2+228,0],[584/2+228,52],
+			         [584/2,35],[-1,35]]);
+		}
+	}
 
 	// Carve the panel itself
 	if (action == "full" || action == "add") {
