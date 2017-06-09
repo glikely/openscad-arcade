@@ -68,7 +68,7 @@ module joystick(color="red", undermount=0, action="add")
 	boltholes = [22,41];
 	box = [60,55,31.8];
 	ears = [20,box[1]+12*2,10];
-	tophole_radius = 11;
+	tophole_radius = 10;
 
 	if (action=="add") {
 		translate([0,0,-undermount]) {
@@ -103,12 +103,12 @@ module joystick(color="red", undermount=0, action="add")
 		translate([0,0,-2/2]) cube([plate[0]+5, plate[1]+5, 2], center=true);
 		// Hole for the joystick box
 		translate([0,0,-(box[2]/2 + 3)])
-			cube([box[0]+5,box[1]+5,box[2]+6], center=true);
+			cube([box[0],box[1],box[2]+6], center=true);
 		// Mounting holes
 		translate([0,0,-(box[2] + 6)]) fourcorners()
 			translate([22,41]) cylinder(r=2, h=box[2]+6);
 		translate([0,0,-(box[2]/2 + 3)])
-			cube([ears[0]+5,ears[1]+5,box[2]+6], center=true);
+			cube([ears[0],ears[1],box[2]+6], center=true);
 
 		// Round hole for joystick shaft
 		translate([0,0,-2/2]) cylinder(r=tophole_radius, h=10);
