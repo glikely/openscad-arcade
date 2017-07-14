@@ -246,6 +246,34 @@ module utrak_trackball(undermount=17, action="add")
 	}
 }
 
+module cpu_96boards(action="add", thickness=17, undermount=3, margin=10, bs=[85,54])
+{
+	if (action == "add") {
+		translate([-bs.x/2,-bs.y,-(thickness+10)])
+			color("green") difference() {
+				cube([bs.x, bs.y, 1]);
+				translate([5,5,-0.1]) cylinder(r=2,h=2);
+				translate([bs.x-5,5,-0.1]) cylinder(r=2,h=2);
+				translate([5,bs.y-5,-0.1]) cylinder(r=2,h=2);
+				translate([bs.x-5,bs.y-5,-0.1]) cylinder(r=2,h=2);
+			}
+		translate([-bs.x/2,-bs.y*2-10,-(thickness+10)])
+			color("green") difference() {
+				cube([bs.x, bs.y, 1]);
+				translate([5,5,-0.1]) cylinder(r=2,h=2);
+				translate([bs.x-5,5,-0.1]) cylinder(r=2,h=2);
+				translate([5,bs.y-5,-0.1]) cylinder(r=2,h=2);
+				translate([bs.x-5,bs.y-5,-0.1]) cylinder(r=2,h=2);
+			}
+	} else if (action=="remove") {
+		translate([0,-bs.y/2,-(thickness+10)])
+			linear_extrude(thickness+10 - undermount)
+				offset(r=margin) square(bs, center=true);
+	} else if (action=="dimensions") {
+		scale_text() text("96Boards Display Window", halign="center");
+	}
+}
+
 // Some of these layouts come from and use the same names as
 // http://www.slagcoin.com/joystick/layout.html
 layouts = [
