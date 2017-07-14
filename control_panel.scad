@@ -149,18 +149,23 @@ module panel_controls(size, r, action="add", start_spacing=120,
 			arc_length = ((2*PI*(r-cluster_ypos))*(panel_arc/360)) - cluster_max_width;
 			arc_angle = 360 * arc_length/(2*PI*(r-cluster_ypos));
 			cluster_angle = num_players > 1 ? arc_angle/(num_players-1) : 0;
+			player_angle = cluster_angle * offset;
 
-			translate([0,curve_origin,0]) rotate([0,0,offset*cluster_angle])
-				translate([0,-r+cluster_ypos ,0]) {
+			translate([0,curve_origin]) rotate([0,0,player_angle])
+				translate([0,-r+cluster_ypos]) {
 					control_cluster(undermount=undermount,
 					                action=action,
 					                max_buttons=p[0], color=p[1],
 					                layout_name=p[2]);
 				}
 
-			if (action=="dimensions" && idx>0) translate([0,curve_origin])
-				rotate([0,0,(offset-0.5)*cluster_angle-90])
-					translate([curve_origin-10,0]) line(size[1]+20);
+			if (action=="dimensions") translate([0,curve_origin])
+				rotate([0,0,player_angle-90])
+					translate([curve_origin-10,0]) {
+						line(size[1]+20);
+						translate([50,0])scale_text()
+							text(str("Angle: ", player_angle, "°"), valign="bottom");
+					}
 		} else {
 			placement_width = size[0] - cluster_max_width;
 			spacing = num_players > 1 ? placement_width/(num_players-1) : 0;
