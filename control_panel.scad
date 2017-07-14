@@ -207,9 +207,9 @@ module inset_profile(inset)
 }
 
 default_layers = [
-	[[0,0,1,.3], plex_thick, 0],
+	[[0,0,1,.3], plex_thick, 0], // Acrylic topsheet
 	[FiberBoard, 6, 0],
-	[FiberBoard, 3, -10],
+	[FiberBoard, 2, -10], // Groove layer for t-moulding
 	[FiberBoard, 6, 0],
 ];
 
@@ -315,7 +315,7 @@ module panel(size=default_size, inset, r=default_radius,
 		projection(cut=true) rotate([0,0,90])
 			lasercut(size, layers, [false,true,false,true])
 			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
-	if (action == "lasercut-3mm")
+	if (action == "lasercut-2mm")
 		projection(cut=true) rotate([0,0,90]) lasercut(size, layers, [false,false,true,false])
 			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
 	if (action == "lasercut-plex")
