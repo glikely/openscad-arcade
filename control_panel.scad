@@ -324,11 +324,6 @@ module panel(size=default_size, inset, r=default_radius,
 	if (action == "vinyl") {
 		projection(cut=true) lasercut(size, layers, [true, false,false,false])
 			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
-
-		mirror_dup([1,0]) translate([0,-size.y-50]) {
-			polygon([[-1,0],[584/2,0],[584/2+228,0],[584/2+228,52],
-			         [584/2,35],[-1,35]]);
-		}
 	}
 
 	// Carve the panel itself
