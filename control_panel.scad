@@ -92,24 +92,24 @@ module panel_profile(size, inset, r, corner=10, action="profile")
 }
 
 /* Some canned control cluster layouts */
-player_config_1 = [[8, "red", "sega2"]];
-player_config_2 = [[6, "red", "sega2"],
-                   [6, "blue", "sega2"]];
-player_config_2t =[[6, "red", "sega2"],
-                   [0, "purple", "trackball"],
-                   [6, "blue", "sega2"]];
-player_config_3 = [[6, "red", "sega2"],
-                   [6, "blue", "sega2"],
-                   [6, "yellow", "sega2"]];
-player_config_4 = [[4, "red", "sega2"],
-                   [6, "blue", "sega2"],
-                   [6, "green", "sega2"],
-                   [4, "yellow", "sega2"]];
-player_config_4t =[[4, "red", "sega2"],
-                   [6, "blue", "sega2"],
-                   [6, "purple", "trackball"],
-                   [6, "green", "sega2"],
-                   [4, "yellow", "sega2"]];
+player_config_1 = [[8, "red", "sega2", true]];
+player_config_2 = [[6, "red", "sega2", true],
+                   [6, "blue", "sega2", true]];
+player_config_2t =[[6, "red", "sega2", true],
+                   [0, "purple", "trackball", false],
+                   [6, "blue", "sega2", true]];
+player_config_3 = [[6, "red", "sega2", true],
+                   [6, "blue", "sega2", true],
+                   [6, "yellow", "sega2", true]];
+player_config_4 = [[4, "red", "sega2", true],
+                   [6, "blue", "sega2", true],
+                   [6, "green", "sega2", true],
+                   [4, "yellow", "sega2", true]];
+player_config_4t =[[4, "red", "sega2", true],
+                   [6, "blue", "sega2", true],
+                   [6, "purple", "trackball2", false],
+                   [6, "green", "sega2", true],
+                   [4, "yellow", "sega2", true]];
 
 module panel_controls(size, r, action="add", start_spacing=120,
                       start_colour="white", pc=player_config_4,
@@ -125,7 +125,7 @@ module panel_controls(size, r, action="add", start_spacing=120,
 
 	// Player Start buttons
 	translate([-start_spacing*(num_players-1)/2, -keepout_border - 28, 0])
-		for (i=[0:num_players-1]) {
+		for (i=[0:num_players-1]) if (pc[i][4]) {
 			translate([start_spacing*i-coin_spacing/2,0,0])
 				button(color=start_colour, action=action, label="start");
 			if (coin_spacing > 0)
@@ -134,7 +134,7 @@ module panel_controls(size, r, action="add", start_spacing=120,
 		}
 
 	// Game Controls
-	for (idx=[0:len(pc)-1]) {
+	for (idx=[0:len(pc)-1]) if (pc[idx]) {
 		p = pc[idx];
 		offset = idx - (num_players-1)/2;
 		if (r) {

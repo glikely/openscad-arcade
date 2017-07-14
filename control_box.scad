@@ -52,7 +52,7 @@ module panel_box(angle, size, inset, r, pc)
 	}
 }
 
-pconfig = [[6, "red", "sega2"],[6, "blue", "sega2"]];
+pconfig = [[6, "red", "sega2", true],[6, "blue", "sega2", true]];
 //panel_box(angle=4, size=[900,400,100],inset=[602,150]);
 translate([-300,0])
 	panel_box(angle=4, size=[500,350,100], inset=[300,150], pc=pconfig);

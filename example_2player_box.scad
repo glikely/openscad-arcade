@@ -1,6 +1,7 @@
 use <control_panel.scad>
 
-pconfig = [[6, "red", "sega2"],[6, "blue", "sega2"]];
+pconfig = [[6, "red", "sega2", true],
+           [6, "blue", "sega2", true]];
 
 size=[600,275,100];
 
