@@ -111,7 +111,7 @@ player_config_4t =[[4, "red", "sega2", true],
                    [6, "green", "sega2", true],
                    [4, "yellow", "sega2", true]];
 
-module panel_controls(size, r, action="add", start_spacing=120,
+module panel_controls(size, inset, r, action="add",
                       start_colour="white", pc=player_config_4,
                       coin_spacing=40, undermount=0, keepout_border=mdf_thick,
                       cluster_ypos=125, cpu_window=false)
@@ -123,15 +123,13 @@ module panel_controls(size, r, action="add", start_spacing=120,
 	curve_origin=r-size[1];
 	num_players = len(pc);
 
-	// Player Start buttons
-	translate([-start_spacing*(num_players-1)/2, -keepout_border - 28, 0])
-		for (i=[0:num_players-1]) if (pc[i][4]) {
-			translate([start_spacing*i-coin_spacing/2,0,0])
-				button(color=start_colour, action=action, label="start");
-			if (coin_spacing > 0)
-				translate([start_spacing*i+coin_spacing/2,0,0])
-					button(color=pc[i][1], action=action, label="coin");
-		}
+	// Values for control cluster placement
+	placement_width = size[0] - cluster_max_width;
+	spacing = num_players > 1 ? placement_width/(num_players-1) : 0;
+
+	// Values for start/select button placement
+	start_ypos = -(keepout_border+28);
+	start_spacing = inset ? (inset[0]-coin_spacing*2)/num_players : spacing;
 
 	// CPU Board Window
 	if (cpu_window) translate([0,-keepout_border-10])
@@ -140,7 +138,7 @@ module panel_controls(size, r, action="add", start_spacing=120,
 	// Game Controls
 	for (idx=[0:len(pc)-1]) if (pc[idx]) {
 		p = pc[idx];
-		offset = idx - (num_players-1)/2;
+		offset = idx - (num_players-1)/2; // idx adjusted to center == 0
 		if (r) {
 			// Calculate the angle between control clusters, taking into
 			// account the total panel width (on the curve), keeping the
@@ -150,6 +148,16 @@ module panel_controls(size, r, action="add", start_spacing=120,
 			arc_angle = 360 * arc_length/(2*PI*(r-cluster_ypos));
 			cluster_angle = num_players > 1 ? arc_angle/(num_players-1) : 0;
 			player_angle = cluster_angle * offset;
+			start_xpos = (curve_origin-start_ypos)*tan(player_angle);
+
+			// Place start/select buttons
+			if (p[3] && !inset) translate([start_xpos, start_ypos, 0]) {
+				translate([-coin_spacing/2,0,0])
+					button(color=start_colour, action=action, label="select");
+				if (coin_spacing)
+					translate([coin_spacing/2,0,0])
+						button(color=p[1], action=action, label="start");
+			}
 
 			translate([0,curve_origin]) rotate([0,0,player_angle])
 				translate([0,-r+cluster_ypos]) {
@@ -166,9 +174,18 @@ module panel_controls(size, r, action="add", start_spacing=120,
 						translate([50,0])scale_text()
 							text(str("Angle: ", player_angle, "°"), valign="bottom");
 					}
-		} else {
-			placement_width = size[0] - cluster_max_width;
-			spacing = num_players > 1 ? placement_width/(num_players-1) : 0;
+		}
+
+		// Player Start buttons
+		if (p[3] && (!r || inset)) {
+			start_xpos = start_spacing*offset;
+			translate([start_xpos-coin_spacing/2, start_ypos])
+				button(color=start_colour, action=action, label="select");
+			if (coin_spacing) translate([start_xpos+coin_spacing/2, start_ypos])
+				button(color=p[1], action=action, label="start");
+		}
+
+		if (!r) {
 			translate([offset*spacing, -size[1]+cluster_ypos]) {
 				control_cluster(undermount=undermount, action=action,
 						max_buttons=p[0], color=p[1],
@@ -264,12 +281,12 @@ module panel(size=default_size, inset, r=default_radius,
 	// Draw the controls first so that the if a transparent panel is used
 	// then the OpenSCAD preview will show the controls behind the panel
 	if (action == "full")
-		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+		panel_controls(size, inset, r, pc=pc, undermount=plex_thick+0.1,
 		               cpu_window=cpu_window);
 
 	// Draw placement guides
 	if (action == "dimensions") color("black") {
-		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+		panel_controls(size, inset, r, pc=pc, undermount=plex_thick+0.1,
 		               cpu_window=cpu_window,
 		               action="dimensions");
 		cutlines()
@@ -319,7 +336,7 @@ module panel(size=default_size, inset, r=default_radius,
 		difference() {
 			panel_multilayer(layers=layers)
 				panel_profile(size, inset, r=r);
-			panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+			panel_controls(size, inset, r, pc=pc, undermount=plex_thick+0.1,
 			               cpu_window=cpu_window,
 			               action="remove");
 		}
@@ -329,11 +346,11 @@ module panel(size=default_size, inset, r=default_radius,
 
 test_radius=[0, 2000, 1000];
 test_config=[
-	[player_config_1, [602,300], undef],
-	[player_config_2, [602,300], undef],
-	[player_config_2t, [650,325], undef],
-	[player_config_3, default_size, default_inset],
-	[player_config_4, default_size, default_inset],
+	[player_config_1, [602,300], undef, false],
+	[player_config_2, [602,300], undef, false],
+	[player_config_2t, [650,325], undef, true],
+	[player_config_3, default_size, default_inset, false],
+	[player_config_4, default_size, default_inset, false],
 	//[player_config_4t, [1000,500], default_inset],
 ];
 
@@ -346,12 +363,13 @@ simple_layers = [
 for (i=[0:len(test_radius)-1]) {
 	xoff = (i-(len(test_radius)-1)/2)*default_size[0]*1.2;
 	for (j=[0:len(test_config)-1]) {
+		tc = test_config[j];
 		yoff = (j-(len(test_config)-1)/2)*default_size[1]*1.4;
 		translate([xoff,yoff]) {
-			panel(size=test_config[j][1],inset=test_config[j][2],
-			      pc=test_config[j][0],trackball=test_config[j][3],
+			panel(size=tc[1], inset=tc[2], pc=tc[0], trackball=tc[3],
 			      r=test_radius[i],action=(i==1 && j==2) ? "full" : "add",
-			      layers=(i==1&&j==2) ? default_layers : simple_layers);
+			      layers=(i==1&&j==2) ? default_layers : simple_layers,
+			      cpu_window=tc[3]);
 		}
 	}
 }
