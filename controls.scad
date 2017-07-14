@@ -61,6 +61,64 @@ module button(color="red", action="add", label) {
 	}
 }
 
+module sanwa_jlf_8s(color="red", undermount=0, action="add", thickness)
+{
+	shaft_len = 27.5+31.8+3.9;
+	plate = [53,72,1.6];
+	ear_inset = 8;
+	ears = [53-0.01,107,1.6-0.01];
+	bolthole_spacing = 107/2-6;
+	bolthole_radius = 2.5;
+	box = [75,61,33];
+	tophole_radius = 10;
+
+	if (action=="add") {
+		// Ball top
+		color(color) {
+			translate([0,0,27.5+(32/2)]) sphere(34/2);
+		}
+		// shaft
+		color("silver") translate([0,0,-shaft_len+28]) cylinder(r=4, h=shaft_len);
+
+		// mounting plate
+		color("silver") translate([0,0,-thickness-plate.z]) {
+			translate([0,0,ear_inset])
+				cube(plate, center=true);
+			difference() {
+				cube(ears, center=true);
+				cube(plate, center=true);
+				translate([0,bolthole_spacing])
+					cylinder(r=bolthole_radius, h=plate.z*2);
+				translate([0,-bolthole_spacing])
+					cylinder(r=bolthole_radius, h=plate.z*2);
+			}
+		}
+
+		// Electronics box
+		color(BlackPaint) translate([0,0,-thickness-plate.z+ear_inset-(box[2]/2)])
+			cube(box, center=true);
+
+		// Dust Cover Disc
+		color("black") cylinder(r=18, h=0.5);
+
+	} else if (action=="remove") translate([0,0,-thickness-0.1]) {
+		// The cutouts for the joystick
+		// Hole for the joystick box
+		translate([0,0,ear_inset-(box[2]+3)/2])
+			cube([box[0],plate[1],box[2]+3], center=true);
+		// Mounting holes
+		translate([0,bolthole_spacing,0])
+			cylinder(r=bolthole_radius, h=thickness-undermount);
+		translate([0,-bolthole_spacing,0])
+			cylinder(r=bolthole_radius, h=thickness-undermount);
+
+		// Round hole for joystick shaft
+		translate([0,0,0]) cylinder(r=tophole_radius, h=thickness+0.2);
+	} else if (action=="dimensions") {
+		circle_center(radius=tophole_radius);
+	}
+}
+
 module joystick(color="red", undermount=0, action="add")
 {
 	shaft_len = 27.5+31.8+3.9;
