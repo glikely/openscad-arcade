@@ -114,7 +114,7 @@ player_config_4t =[[4, "red", "sega2", true],
 module panel_controls(size, r, action="add", start_spacing=120,
                       start_colour="white", pc=player_config_4,
                       coin_spacing=40, undermount=0, keepout_border=mdf_thick,
-                      cluster_ypos=125)
+                      cluster_ypos=125, cpu_window=false)
 {
 	// '275' is loosely the width of a single control cluster.
 	cluster_max_width=275;
@@ -132,6 +132,10 @@ module panel_controls(size, r, action="add", start_spacing=120,
 				translate([start_spacing*i+coin_spacing/2,0,0])
 					button(color=pc[i][1], action=action, label="coin");
 		}
+
+	// CPU Board Window
+	if (cpu_window) translate([0,-keepout_border-10])
+		cpu_96boards(action=action);
 
 	// Game Controls
 	for (idx=[0:len(pc)-1]) if (pc[idx]) {
@@ -250,16 +254,18 @@ default_radius = 1000;
  */
 module panel(size=default_size, inset, r=default_radius,
              pc=player_config_4, layers=default_layers,
-             action="full")
+             action="full", cpu_window=false)
 {
 	// Draw the controls first so that the if a transparent panel is used
 	// then the OpenSCAD preview will show the controls behind the panel
 	if (action == "full")
-		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1);
+		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+		               cpu_window=cpu_window);
 
 	// Draw placement guides
 	if (action == "dimensions") color("black") {
 		panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+		               cpu_window=cpu_window,
 		               action="dimensions");
 		cutlines()
 			translate([0,0,0.2])
@@ -309,6 +315,7 @@ module panel(size=default_size, inset, r=default_radius,
 			panel_multilayer(layers=layers)
 				panel_profile(size, inset, r=r);
 			panel_controls(size, r=r, pc=pc, undermount=plex_thick+0.1,
+			               cpu_window=cpu_window,
 			               action="remove");
 		}
 	}
