@@ -113,7 +113,7 @@ player_config_4t =[[4, "red", "sega2", true],
 
 module panel_controls(size, inset, r, action="add",
                       start_colour="white", pc=player_config_4,
-                      coin_spacing=40, undermount=0, keepout_border=mdf_thick,
+                      coin_spacing=50, keepout_border=mdf_thick,
                       cluster_ypos=125, cpu_window=false)
 {
 	// '275' is loosely the width of a single control cluster.
@@ -161,8 +161,7 @@ module panel_controls(size, inset, r, action="add",
 
 			translate([0,curve_origin]) rotate([0,0,player_angle])
 				translate([0,-r+cluster_ypos]) {
-					control_cluster(undermount=undermount,
-					                action=action,
+					control_cluster(action=action,
 					                max_buttons=p[0], color=p[1],
 					                layout_name=p[2]);
 				}
@@ -187,7 +186,7 @@ module panel_controls(size, inset, r, action="add",
 
 		if (!r) {
 			translate([offset*spacing, -size[1]+cluster_ypos]) {
-				control_cluster(undermount=undermount, action=action,
+				control_cluster(action=action,
 						max_buttons=p[0], color=p[1],
 						layout_name=p[2]);
 			}
@@ -281,14 +280,12 @@ module panel(size=default_size, inset, r=default_radius,
 	// Draw the controls first so that the if a transparent panel is used
 	// then the OpenSCAD preview will show the controls behind the panel
 	if (action == "full")
-		panel_controls(size, inset, r, pc=pc, undermount=plex_thick+0.1,
-		               cpu_window=cpu_window);
+		panel_controls(size, inset, r, pc=pc, cpu_window=cpu_window);
 
 	// Draw placement guides
 	if (action == "dimensions") color("black") {
-		panel_controls(size, inset, r, pc=pc, undermount=plex_thick+0.1,
-		               cpu_window=cpu_window,
-		               action="dimensions");
+		panel_controls(size, inset, r, pc=pc,
+		               cpu_window=cpu_window, action="dimensions");
 		cutlines()
 			translate([0,0,0.2])
 				panel(size, inset, r, pc, layers, action="add");
@@ -331,9 +328,8 @@ module panel(size=default_size, inset, r=default_radius,
 		difference() {
 			panel_multilayer(layers=layers)
 				panel_profile(size, inset, r=r);
-			panel_controls(size, inset, r, pc=pc, undermount=plex_thick+0.1,
-			               cpu_window=cpu_window,
-			               action="remove");
+			panel_controls(size, inset, r, pc=pc,
+			               cpu_window=cpu_window, action="remove");
 		}
 	}
 
