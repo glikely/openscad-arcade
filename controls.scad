@@ -5,7 +5,8 @@ use <utility.scad>
 function panel_depth() = $panel_depth ? $panel_depth : 17;
 function panel_undermount() = $panel_undermount ? $panel_undermount : plex_thick;
 
-module button(color="red", action="add", label) {
+module button(color="red", action="add", label)
+{
 	// Parameters
 	screw_diameter = 23.8;
 	screw_length = 31.2;
@@ -30,7 +31,8 @@ module button(color="red", action="add", label) {
 					cylinder(r=25/2,h=12);
 			}
 
-			translate([0,0,-screw_length]) cylinder(r=screw_diameter/2,h=screw_length);
+			translate([0,0,-screw_length])
+				cylinder(r=screw_diameter/2,h=screw_length);
 			difference() {
 				cylinder(r=button_diameter/2,h=button_height);
 				translate([0,0,30])
@@ -317,18 +319,19 @@ module control_cluster(color="red", layout_name="sega2",
 	// Find and place list of buttons
 	btns=layout[search(["button"], layout)[0]];
 	for(p=[1:len(btns)-1])
-		if (p <= max_buttons)
-			translate(btns[p]) button(color, action=action); // 1st bottom
+		if (p <= max_buttons) translate(btns[p])
+			button(color, action=action); // 1st button
 
 	// Find and place joysticks
 	joy=layout[search(["joystick"], layout)[0]];
 	for(p=[1:len(joy)-1])
-		translate(joy[p]) joystick(color, action=action);
+		translate(joy[p])
+			sanwa_jlf_8s(color, action=action);
 
 	// Find and place trackballs
 	track=layout[search(["utrak"], layout)[0]];
-	for(p=[1:len(track)-1])
-		translate(track[p]) utrak_trackball(action=action);
+	for(p=[1:len(track)-1]) translate(track[p])
+		utrak_trackball(action=action);
 
 	if (action=="dimensions") {
 		translate([-size[0]/2-10,size[1]/2])
