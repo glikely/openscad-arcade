@@ -287,7 +287,7 @@ module panel(size=default_size, inset, r=default_radius,
 		panel_controls(size, inset, r, pc=pc,
 		               cpu_window=cpu_window, action="dimensions");
 		cutlines()
-			translate([0,0,0.2])
+			translate([0,0,panel_undermount()+0.2])
 				panel(size, inset, r, pc, layers, action="add");
 		panel_profile(size, inset, r=r, action="dimensions");
 	}
@@ -319,7 +319,7 @@ module panel(size=default_size, inset, r=default_radius,
 		projection(cut=true) rotate([0,0,90]) lasercut(size, layers, [true, false,false,false])
 			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
 	if (action == "vinyl") {
-		projection(cut=true) lasercut(size, layers, [true, false,false,false])
+		projection(cut=true) lasercut(size, layers, [false, true,false,false])
 			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
 	}
 
