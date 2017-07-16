@@ -201,6 +201,8 @@ module utrak_trackball(action="add")
 	hole_radius = 5/2;
 	housing_height = 19;
 	housing_radius = 82/2;
+	bezel_radius = 86/2;
+	bezel_height = 8;
 	flang_height = 2;
 	flang_radius = housing_radius + 5;
 
@@ -241,14 +243,19 @@ module utrak_trackball(action="add")
 			//rotate([0,0,45])
 			//	cube([diag_width+5,diag_length+5,box_height], center=true);
 		}
-		cylinder(r=housing_radius, h=box_height + panel_depth());
-		// Bolt holes
-		utrak_mounts()
-			cylinder(r=hole_radius, h=box_height/2+panel_depth()-2.1);
+		translate([0,0,-panel_depth()-0.01]) {
+			cylinder(r=housing_radius, h=panel_depth()+0.02);
+			// Bolt holes
+			utrak_mounts()
+				cylinder(r=hole_radius, h=panel_depth()-panel_undermount());
+		}
+		translate([0,0,-bezel_height-0.01])
+			cylinder(r=bezel_radius, h=bezel_height+0.02);
 	} else if (action=="dimensions") {
 		circle_center(housing_radius, size=housing_radius/4);
 		utrak_mounts()
 			circle_center(hole_radius);
+		translate([0,10]) scale_text() text("Trackball", halign="center");
 	}
 }
 
