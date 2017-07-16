@@ -310,11 +310,7 @@ layouts = [
 	                      [31.25,     -9],[31.25,      27],
 	                      [31.25+35,   0],[31.25+35,   36],
 	                      [31.25+35+36,0],[31.25+35+36,36]]],
-	["trackball",  ["utrak", [0,0]]],
-	["trackball2", ["utrak", [0,0]],
-	               ["button", [-20, 100], [20,100]]],
-	["trackball3", ["utrak", [0,0]],
-	               ["button", [100, -40], [110,0], [100,40]]]
+	["trackball",  ["utrak", [0,0]]]
 ];
 
 module control_cluster(color="red", layout_name="sega2",
