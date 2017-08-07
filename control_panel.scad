@@ -217,11 +217,11 @@ default_layers = [
  * panel_multilayer() - construct a panel out of multiple layers
  * layers: Array of layer descriptions. Each layer is a nested array containing
  *         layer colour and layer thickness (mm).
- * separation: Separate the layers so each one can be seen individually
+ * distribute: vector to dispurse layers so each one can be seen individually
  * depth: (iteration variable) depth of the current layer.
  * i: (internal iteration) index of layer being worked on
  */
-module panel_multilayer(layers=default_layers, separation=10, depth=0, i=0, action="add")
+module panel_multilayer(layers=default_layers, distribute=[0,0,0], depth=0, i=0, action="add")
 {
 	layer_gap = 0.01;
 	if (i < len(layers)) {
@@ -230,45 +230,31 @@ module panel_multilayer(layers=default_layers, separation=10, depth=0, i=0, acti
 		// Draw the bottom layers first on the assumption that the top
 		// layer will be transparent. OpenSCAD Preview shows the right
 		// thing if transparent items are added last.
-		translate([0,0,-separation]) panel_multilayer(layers, separation, depth=depth+layer[1], i=i+1) {
+		translate(distribute) panel_multilayer(layers, distribute, depth=depth+layer[1], i=i+1, action=action) {
 			children([0]);
 			children([1]);
 		}
 
 		// Add the layer
-		color(layer[0]) difference() {
+		if (action == "add") color(layer[0]) difference() {
 			translate([0,0,-depth-layer[1]])
 				linear_extrude(layer[1]-layer_gap, convexity=10)
 					offset(r=layer[2])
 						children([0]);
 			children([1]);
 		}
-	}
-}
 
-// Create manufacturing drawings by slicing the panel multiple times
-module lasercut(size, layers, filter, i=0)
-{
-	layer_gap = 0.01;
-	if (i < len(layers)) {
-		// This layer
-		if (filter[i]) {
-			translate([size.x/2, 0, 0.1])
-				children();
-
-			// Next layer
-			translate([0, -size.y-20, layers[i][1]+layer_gap])
-				lasercut(size, layers, filter, i+1)
-					children();
-		} else {
-			// Next layer
-			translate([0, 0, layers[i][1]+layer_gap])
-				lasercut(size, layers, filter, i+1)
-					children();
+		if (action == "lasercut") difference() {
+			offset(r=layer[2]) children([0]);
+			// Trim the negative object to only this layer
+			projection() intersection() {
+				translate([0,0,-depth-(layer[1]/2)])
+					cube([2000,2000,layer[1]], center=true);
+				children([1]);
+			}
 		}
 	}
 }
-
 
 // Default dimensions used for convenience in testing
 default_size = [900, 400];
@@ -318,24 +304,10 @@ module panel(size=default_size, inset, r=default_radius,
 			rotate([0,0,90]) line(pagesize.y - margin * 2);
 	}
 
-	if (action == "lasercut-6mm")
-		projection(cut=true) rotate([0,0,90])
-			lasercut(size, layers, [false,true,false,true])
-			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
-	if (action == "lasercut-2mm")
-		projection(cut=true) rotate([0,0,90]) lasercut(size, layers, [false,false,true,false])
-			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
-	if (action == "lasercut-plex")
-		projection(cut=true) rotate([0,0,90]) lasercut(size, layers, [true, false,false,false])
-			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
-	if (action == "vinyl") {
-		projection(cut=true) lasercut(size, layers, [false, true,false,false])
-			panel(size, inset=inset, r=r, pc=pc, layers=layers, action="add");
-	}
-
 	// Carve the panel itself
-	if (action == "full" || action == "add") {
-		panel_multilayer(layers=layers, action=action) {
+	if (action == "full" || action == "add" || action == "lasercut") {
+		panel_multilayer(layers=layers, distribute=(action == "lasercut") ? [0,350,0] : 0,
+		                 action=(action == "lasercut") ? "lasercut" : "add") {
 			panel_profile(size, inset, r=r);
 			panel_controls(size, inset, r, pc=pc,
 			               cpu_window=cpu_window, action="remove");
