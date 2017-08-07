@@ -3,7 +3,8 @@ use <dimlines.scad>
 use <utility.scad>
 
 function panel_depth() = $panel_depth ? $panel_depth : 17;
-function panel_undermount() = $panel_undermount ? $panel_undermount : plex_thick;
+function panel_window_depth() = $panel_window_depth ? $panel_window_depth : plex_thick;
+function panel_mount_depth() = $panel_mount_depth ? $panel_mount_depth : plex_thick;
 
 module button(color="red", action="add", label)
 {
@@ -55,10 +56,9 @@ module button(color="red", action="add", label)
 				cube(switch_size, center=true);
 	} else if (action=="remove") {
 		// Dimensions for mounting hole. Right through all the layers
-		// The +10 is to make sure the cut is all the way through the panel
-		translate([0,0,-(screw_length+10)]) {
-			cylinder(r=28/2, h=screw_length+10+button_height);
-			cylinder(r=(fixingring_diameter+5)/2, h=10+10); // countersink for fixing ring
+		translate([0,0,-(screw_length)]) {
+			cylinder(r=28/2, h=screw_length+button_height);
+			cylinder(r=(fixingring_diameter+5)/2, h=10); // countersink for fixing ring
 		}
 	} else if (action=="dimensions") {
 		circle_center(radius=28/2);
@@ -72,7 +72,7 @@ module sanwa_jlf_8s(color="red", action="add")
 	shaft_len = 27.5+31.8+3.9;
 	plate = [53,72,1.6];
 	ear_inset = 8;
-	ears = [53-0.01,107,1.6-0.01];
+	ears = [53,107,1.6];
 	bolthole_spacing = 107/2-6;
 	bolthole_radius = 2.5;
 	box = [75,61,33];
@@ -107,19 +107,19 @@ module sanwa_jlf_8s(color="red", action="add")
 		// Dust Cover Disc
 		color("black") cylinder(r=18, h=0.5);
 
-	} else if (action=="remove") translate([0,0,-panel_depth()-0.1]) {
+	} else if (action=="remove") translate([0,0,-panel_depth()]) {
 		// The cutouts for the joystick
 		// Hole for the joystick box
-		translate([0,0,ear_inset-(box[2]+3)/2])
-			cube([box[0],plate[1],box[2]+3], center=true);
+		translate([0,0,ear_inset-(box[2])/2])
+			cube([box[0],plate[1],box[2]], center=true);
 		// Mounting holes
 		translate([0,bolthole_spacing,0])
-			cylinder(r=bolthole_radius, h=panel_depth()-panel_undermount());
+			cylinder(r=bolthole_radius, h=panel_depth()-panel_mount_depth());
 		translate([0,-bolthole_spacing,0])
-			cylinder(r=bolthole_radius, h=panel_depth()-panel_undermount());
+			cylinder(r=bolthole_radius, h=panel_depth()-panel_mount_depth());
 
 		// Round hole for joystick shaft
-		translate([0,0,0]) cylinder(r=tophole_radius, h=panel_depth()+0.2);
+		translate([0,0,0]) cylinder(r=tophole_radius, h=panel_depth());
 	} else if (action=="dimensions") {
 		circle_center(radius=tophole_radius);
 	}
@@ -135,7 +135,7 @@ module joystick(color="red", action="add")
 	tophole_radius = 10;
 
 	if (action=="add") {
-		translate([0,0,-panel_undermount()]) {
+		translate([0,0,-panel_mount_depth()]) {
 			// Ball top
 			color(color) {
 				translate([0,0,27.5+(32/2)]) sphere(34/2);
@@ -161,7 +161,7 @@ module joystick(color="red", action="add")
 		// Dust Cover Disc
 		color("black") cylinder(r=18, h=0.5);
 
-	} else if (action=="remove") translate([0,0,-panel_undermount()]) {
+	} else if (action=="remove") translate([0,0,-panel_mount_depth()]) {
 		// The cutouts for the joystick
 		// Mount place profile
 		translate([0,0,-2/2]) cube([plate[0]+5, plate[1]+5, 2], center=true);
@@ -234,8 +234,8 @@ module utrak_trackball(action="add")
 		// Trackball
 		translate([0,0,0]) color([1,0,1,0.75]) sphere(3/2 * 25.4);
 	} else if (action=="remove") {
-		translate([0,0,-panel_depth()-box_height/2-0.5]) intersection() {
-			cube([box_width+5,box_width+5,box_height], center=true);
+		translate([0,0,-panel_depth()-box_height/2]) intersection() {
+			cube([box_width,box_width,box_height], center=true);
 			// FIXME - The following two lines should be
 			// uncommented, but it confuses OpenSCAD. In the mean
 			// time leave it out and live with a larger than
@@ -243,14 +243,14 @@ module utrak_trackball(action="add")
 			//rotate([0,0,45])
 			//	cube([diag_width+5,diag_length+5,box_height], center=true);
 		}
-		translate([0,0,-panel_depth()-0.01]) {
-			cylinder(r=housing_radius, h=panel_depth()+0.02);
+		translate([0,0,-panel_depth()]) {
+			cylinder(r=housing_radius, h=panel_depth());
 			// Bolt holes
 			utrak_mounts()
-				cylinder(r=hole_radius, h=panel_depth()-panel_undermount());
+				cylinder(r=hole_radius, h=panel_depth()-panel_mount_depth());
 		}
-		translate([0,0,-bezel_height-0.01])
-			cylinder(r=bezel_radius, h=bezel_height+0.02);
+		translate([0,0,-bezel_height])
+			cylinder(r=bezel_radius, h=bezel_height);
 	} else if (action=="dimensions") {
 		circle_center(housing_radius, size=housing_radius/4);
 		utrak_mounts()
@@ -279,11 +279,13 @@ module cpu_96boards(action="add", margin=10, bs=[85,54])
 				translate([bs.x-5,bs.y-5,-0.1]) cylinder(r=2,h=2);
 			}
 	} else if (action=="remove") {
-		translate([0,-bs.y/2,-(panel_depth()+10)])
-			linear_extrude(panel_depth()+10 - panel_undermount())
+		translate([0,-bs.y/2,-(panel_depth())])
+			linear_extrude(panel_depth() - panel_window_depth())
 				offset(r=margin) square(bs, center=true);
 	} else if (action=="dimensions") {
 		scale_text() text("96Boards Display Window", halign="center");
+		translate([0,-bs.y/2])
+			_cutlines() offset(r=margin) square(bs, center=true);
 	}
 }
 
@@ -350,8 +352,8 @@ module control_cluster(color="red", layout_name="sega2",
 
 // Demonstration code. Show each of the default layouts
 test_spacing=300;
-$panel_undermount = 0;
 for (idx=[0:len(layouts)-1]) {
+	$panel_mount_depth = 0;
 	translate([test_spacing*(idx-len(layouts)/2+0.5),0,0]) {
 		layout = layouts[idx];
 		layout_name = layout[0];

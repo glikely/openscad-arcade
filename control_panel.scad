@@ -32,7 +32,7 @@ module panel_profile(size, inset, r, corner=10, action="profile")
 		// Optional curved front
 		if (r) intersection() {
 			panel_arc = asin((size[0]/2)/r)*2;
-			echo(str("Panel Arc: ", panel_arc, "°"));
+			//echo(str("Panel Arc: ", panel_arc, "°"));
 			translate([0,curve_origin,0]) circle(r,$fa=2);
 			translate([-size[0]/2, -size[1]])
 				square([size[0],size[1]-front+0.1]);
@@ -113,7 +113,7 @@ player_config_4t =[[4, "red", "sega2", true],
 
 module panel_controls(size, inset, r, action="add",
                       start_colour="white", pc=player_config_4,
-                      coin_spacing=50, keepout_border=mdf_thick,
+                      coin_spacing=40, keepout_border=mdf_thick,
                       cluster_ypos=125, cpu_window=false)
 {
 	// '275' is loosely the width of a single control cluster.
@@ -205,40 +205,40 @@ module inset_profile(inset)
 	}
 }
 
+layer_gap = 0.01;
 default_layers = [
-	[[0,0,1,.3], plex_thick, 0], // 3mm Acrylic topsheet
-	[[0,0,0,1], 0.02, 0], // Vinyl Graphic Overlay
+	[[0,0,1,.3], plex_thick, 0], // 3mm Perspex topsheet
+	[[0,0,0], layer_gap*3, 0], // Vinyl Graphic Overlay
 	[FiberBoard, 6, 0],   // MDF Top (6mm)
 	[FiberBoard, 2, -8], // MDF Middle (2mm) with t-moulding groove
 	[FiberBoard, 6, 0],   // MDF Bottom (6mm)
 ];
+
+function layer_depth(layers=default_layers, n, i=0) =
+		(i < len(layers)) && (n != i) ?
+			layers[i][1] + layer_depth(layers, n, i+1) :
+			0;
 
 /**
  * panel_multilayer() - construct a panel out of multiple layers
  * layers: Array of layer descriptions. Each layer is a nested array containing
  *         layer colour and layer thickness (mm).
  * distribute: vector to dispurse layers so each one can be seen individually
- * depth: (iteration variable) depth of the current layer.
- * i: (internal iteration) index of layer being worked on
  */
-module panel_multilayer(layers=default_layers, distribute=[0,0,0], depth=0, i=0, action="add")
+module panel_multilayer(layers=default_layers, distribute=[0,0,0], action="add")
 {
-	layer_gap = 0.01;
-	if (i < len(layers)) {
-		layer = layers[i];
 
-		// Draw the bottom layers first on the assumption that the top
-		// layer will be transparent. OpenSCAD Preview shows the right
-		// thing if transparent items are added last.
-		translate(distribute) panel_multilayer(layers, distribute, depth=depth+layer[1], i=i+1, action=action) {
-			children([0]);
-			children([1]);
-		}
+	// Draw the bottom layers first on the assumption that the top
+	// layer will be transparent. OpenSCAD Preview shows the right
+	// thing if transparent items are added last.
+	for (i = [len(layers)-1:-1:0]) translate(i * distribute) {
+		//echo("doing layer", i, "depth", layer_depth(layers, n=i+1));
+		layer = layers[i];
 
 		// Add the layer
 		if (action == "add") color(layer[0]) difference() {
-			translate([0,0,-depth-layer[1]])
-				linear_extrude(layer[1]-layer_gap, convexity=10)
+			translate([0,0,-layer_depth(layers, n=i+1)+layer_gap])
+				linear_extrude(layer[1]-layer_gap*2, convexity=10)
 					offset(r=layer[2])
 						children([0]);
 			children([1]);
@@ -248,8 +248,8 @@ module panel_multilayer(layers=default_layers, distribute=[0,0,0], depth=0, i=0,
 			offset(r=layer[2]) children([0]);
 			// Trim the negative object to only this layer
 			projection() intersection() {
-				translate([0,0,-depth-(layer[1]/2)])
-					cube([2000,2000,layer[1]], center=true);
+				translate([-1000,-1000,-layer_depth(layers, n=i+1)+layer_gap])
+					cube([2000,2000,layer[1]-layer_gap*2]);
 				children([1]);
 			}
 		}
@@ -273,6 +273,10 @@ module panel(size=default_size, inset, r=default_radius,
              pc=player_config_4, layers=default_layers,
              action="full", cpu_window=false)
 {
+	$panel_depth = layer_depth(layers);
+	$panel_window_depth = layer_depth(layers, n=1);
+	$panel_mount_depth = layer_depth(layers, n=2);
+
 	// Draw the controls first so that the if a transparent panel is used
 	// then the OpenSCAD preview will show the controls behind the panel
 	if (action == "full")
