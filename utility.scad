@@ -57,3 +57,29 @@ module fourcorners()
 		mirror_dup([1,0])
 			children();
 }
+
+/**
+ * jigsaw_mask() - 2D Utility object for creating jigsaw cuts
+ * size: size of mask object. Jigsaw profile will be on the left hand side
+ * tcount: number of jigsaw teeth
+ * tdepth: depth of jigsaw teeth
+ * r: curve radius for smoothing
+ */
+module jigsaw_mask(size, tcount=2, tdepth=10, r=3)
+{
+	tsize = size.y/tcount/2;
+
+	$fn=100;
+	round_corners(r) {
+		square(size);
+		for (i = [0: tcount-1]) {
+			translate([0, tsize * 2 * (i+0.5)])
+				polygon([[-tdepth, -tsize/2-tdepth/4],
+				         [-tdepth,  tsize/2+tdepth/4],
+				         [0,     tsize/2-tdepth/4],
+				         [0,    -tsize/2+tdepth/4]]);
+		}
+	}
+}
+
+jigsaw_mask([200,200]);
