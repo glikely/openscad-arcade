@@ -288,21 +288,8 @@ module panel(size=default_size, inset, r=default_radius,
 		panel_profile(size, inset, r=r, action="dimensions");
 	}
 
-	if (action == "drawings") projection() {
-		pagesize = paper_sizes[search(["A1"], paper_sizes)[0]][1];
-		margin = 20;
-
-		translate([pagesize.x/2, pagesize.y/2 + size.y/2])
-			panel(size, inset=inset, r=r, pc=pc, layers=layers,
-			      action="dimensions");
-
-		translate([margin, margin]) line(pagesize.x - margin * 2);
-		translate([margin, pagesize.y - margin]) line(pagesize.x - margin * 2);
-		translate([margin, margin])
-			rotate([0,0,90]) line(pagesize.y - margin * 2);
-		translate([pagesize.x - margin, margin])
-			rotate([0,0,90]) line(pagesize.y - margin * 2);
-	}
+	if (action == "drawings") projection()
+		panel(size, inset=inset, r=r, pc=pc, layers=layers, action="dimensions", cpu_window=cpu_window);
 
 	// Carve the panel itself
 	if (action == "full" || action == "add" || action == "lasercut") {
