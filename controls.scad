@@ -357,39 +357,22 @@ for (idx=[0:len(layouts)-1]) {
 		layout_name = layout[0];
 		translate([0,-100]) color("black") scale_text()
 			text(layout_name, halign="center");
-		translate([0,-1000]) {
-			control_cluster(layout_name=layout_name, max_buttons=4);
-			color([0,0,1,1]) difference() {
-				translate([0,0,-20/2-0.1])
-					cube([test_spacing-25,225,20], center=true);
-				control_cluster(layout_name=layout_name,
-				                action="remove", max_buttons=4);
-			}
-		}
-		translate([0,-750]) {
-			control_cluster(layout_name=layout_name, max_buttons=6);
-			color([0,0,1,1]) difference() {
-				translate([0,0,-20/2-0.1])
-					cube([test_spacing-25,225,20], center=true);
-				control_cluster(layout_name=layout_name,
-				                action="remove", max_buttons=6);
-			}
-		}
-		translate([0,-500]) control_cluster(layout_name=layout_name);
-		translate([0,-250]) {
+		translate([0,-500]) {
 			control_cluster(layout_name=layout_name);
 			color([0,0,1,1]) difference() {
-				translate([0,0,-20/2-0.1])
-					cube([test_spacing-25,225,20], center=true);
+				translate([0,0,-17/2])
+					cube([test_spacing-25,225,17], center=true);
 				control_cluster(layout_name=layout_name,
 				                action="remove");
 			}
 		}
+		translate([0,-250])
+			control_cluster(layout_name=layout_name);
 		translate([0,0]) {
 			control_cluster(layout_name=layout_name);
 			color([0,0,1,0.3]) difference() {
-				translate([0,0,-20/2-0.1])
-					cube([test_spacing-25,225,20], center=true);
+				translate([0,0,-17/2])
+					cube([test_spacing-25,225,17], center=true);
 				control_cluster(layout_name=layout_name,
 				                action="remove");
 			}
@@ -397,8 +380,8 @@ for (idx=[0:len(layouts)-1]) {
 		translate([0,250]) color([0,0,1,0.3]) {
 			control_cluster(layout_name=layout_name, action="guide");
 			difference() {
-				translate([0,0,-20/2-0.1])
-					cube([test_spacing-25,225,20], center=true);
+				translate([0,0,-17/2])
+					cube([test_spacing-25,225,17], center=true);
 				control_cluster(layout_name=layout_name,
 				                action="remove");
 			}
