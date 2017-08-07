@@ -206,10 +206,11 @@ module inset_profile(inset)
 }
 
 default_layers = [
-	[[0,0,1,.3], plex_thick, 0], // Acrylic topsheet
-	[FiberBoard, 6, 0],
-	[FiberBoard, 2, -10], // Groove layer for t-moulding
-	[FiberBoard, 6, 0],
+	[[0,0,1,.3], plex_thick, 0], // 3mm Acrylic topsheet
+	[[0,0,0,1], 0.02, 0], // Vinyl Graphic Overlay
+	[FiberBoard, 6, 0],   // MDF Top (6mm)
+	[FiberBoard, 2, -10], // MDF Middle (2mm) with t-moulding groove
+	[FiberBoard, 6, 0],   // MDF Bottom (6mm)
 ];
 
 /**
