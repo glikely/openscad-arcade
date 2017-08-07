@@ -217,23 +217,32 @@ default_layers = [
  * panel_multilayer() - construct a panel out of multiple layers
  * layers: Array of layer descriptions. Each layer is a nested array containing
  *         layer colour and layer thickness (mm).
- * i: (do not use) internal iteration variable
+ * separation: Separate the layers so each one can be seen individually
+ * depth: (iteration variable) depth of the current layer.
+ * i: (internal iteration) index of layer being worked on
  */
-module panel_multilayer(layers=default_layers, i=0)
+module panel_multilayer(layers=default_layers, separation=10, depth=0, i=0, action="add")
 {
 	layer_gap = 0.01;
 	if (i < len(layers)) {
+		layer = layers[i];
+
 		// Draw the bottom layers first on the assumption that the top
 		// layer will be transparent. OpenSCAD Preview shows the right
 		// thing if transparent items are added last.
-		translate([0,0,-layers[i][1]-layer_gap])
-			panel_multilayer(layers, i+1) children();
+		translate([0,0,-separation]) panel_multilayer(layers, separation, depth=depth+layer[1], i=i+1) {
+			children([0]);
+			children([1]);
+		}
 
 		// Add the layer
-		color(layers[i][0]) translate([0,0,-layers[i][1]])
-			linear_extrude(layers[i][1], convexity=10)
-				offset(r=layers[i][2])
-					children();
+		color(layer[0]) difference() {
+			translate([0,0,-depth-layer[1]])
+				linear_extrude(layer[1]-layer_gap, convexity=10)
+					offset(r=layer[2])
+						children([0]);
+			children([1]);
+		}
 	}
 }
 
@@ -326,9 +335,8 @@ module panel(size=default_size, inset, r=default_radius,
 
 	// Carve the panel itself
 	if (action == "full" || action == "add") {
-		difference() {
-			panel_multilayer(layers=layers)
-				panel_profile(size, inset, r=r);
+		panel_multilayer(layers=layers, action=action) {
+			panel_profile(size, inset, r=r);
 			panel_controls(size, inset, r, pc=pc,
 			               cpu_window=cpu_window, action="remove");
 		}
