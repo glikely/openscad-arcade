@@ -290,7 +290,7 @@ module cpu_96boards(action="add", margin=10, bs=[85,54])
 	} else if (action=="dimensions") {
 		scale_text() text("96Boards Display Window", halign="center");
 		translate([0,-bs.y/2])
-			_cutlines() offset(r=margin) square(bs, center=true);
+			cutlines() offset(r=margin) square(bs, center=true);
 	}
 }
 

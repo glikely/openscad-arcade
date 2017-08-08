@@ -253,6 +253,16 @@ module panel_multilayer(layers=default_layers, distribute=[0,0,0], action="add")
 				children([1]);
 			}
 		}
+
+		if (action == "dimensions") cutlines() difference() {
+			offset(r=layer[2]) children([0]);
+			// Trim the negative object to only this layer
+			projection() intersection() {
+				translate([-1000,-1000,-layer_depth(layers, n=i+1)+layer_gap])
+					cube([2000,2000,layer[1]-layer_gap*2]);
+				children([1]);
+			}
+		}
 	}
 }
 
@@ -286,10 +296,12 @@ module panel(size=default_size, inset, r=default_radius,
 	if (action == "dimensions") color("black") {
 		panel_controls(size, inset, r, pc=pc,
 		               cpu_window=cpu_window, action="dimensions");
-		cutlines()
-			translate([0,0,panel_undermount()+0.2])
-				panel(size, inset, r, pc, layers, action="add");
 		panel_profile(size, inset, r=r, action="dimensions");
+		panel_multilayer(layers=layers, action="dimensions") {
+			panel_profile(size, inset, r=r);
+			panel_controls(size, inset, r, pc=pc,
+			               cpu_window=cpu_window, action="remove");
+		}
 	}
 
 	if (action == "drawings") projection()

@@ -1,18 +1,17 @@
 /**
- * cutlines() - Take a horizontal slice of the panel and create an outline model
- *              of the cut lines.
+ * cutlines() - create an outline of a 2D object
  * line_width: Width of cut lines to draw.
+ *
+ * Note: this is useful for creating SVG dimension drawings, but not for
+ * creating lasercutter output. This is used to prevent OpenSCAD SVG output
+ * from just merging all objects into one large blob instead of distinct lines
  */
-module _cutlines(line_width)
+module cutlines(line_width=0.5)
 {
 	difference() {
 		offset(delta=line_width) children();
 		children();
 	}
-}
-module cutlines(line_width=0.5) {
-	linear_extrude(0.01, convexity=10)
-		_cutlines(line_width) projection(cut=true) children();
 }
 
 /**
