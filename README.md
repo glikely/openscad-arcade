@@ -66,16 +66,11 @@ The following features still need to be implemented
 - PDF output of control panel layout to be used as template for graphics design
 - Flattened layout of cabinet panels to use as cutting guide
 - Support for side mounted pinball buttons
-- Check joystick mount dimensions are correct for all joystick manufactures
 - Model "spinner" controls
 - Model coin slots/door
 - Model control boards and mounts
 - Model speakers
 - Add mounting holes for joysticks
-- Adjust centring of control clusters to account for the number of buttons placed
-- decouple number of start/coin buttons from number of control clusters.  ex. A
-  trackball can be placed as a control cluster, but it doesn't normally have its
-  own start/coin buttons.
 - Allow vertical/horizontal/angle adjustment on control cluster placement instead
   of fixed by the formula.
 - Allow 2 rows of control clusters
