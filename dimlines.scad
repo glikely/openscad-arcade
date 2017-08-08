@@ -32,7 +32,7 @@
  *
  * the following functions or modules are available.
  *
- *  line(length, width, height=DIM_HEIGHT, left_arrow=false, right_arrow=false)
+ *  line(length, width, left_arrow=false, right_arrow=false)
  *      Can draw a line with the options of including an arrow at either end
  *
  *  circle_center(radius, size, line_width)
@@ -107,16 +107,13 @@ DIM_FONTSIZE = 4;
 
 // an approximation that sets the line widths relative to the font size
 DIM_LINE_WIDTH = DIM_FONTSIZE / 7; // width of dimension lines
-DIM_HEIGHT = .01; // height of lines
 
 // refers to the size of the cross within a circle
 DIM_HOLE_CENTER = DIM_LINE_WIDTH * 6;
 
 
-module arrow(arr_points, arr_length, height) {
+module arrow(arr_points, arr_length) {
     // arrow points to the left
-    linear_extrude(height=height, convexity=2)
-
     polygon(
         points = [[0, 0],
                 [arr_points, arr_points / 2],
@@ -126,13 +123,10 @@ module arrow(arr_points, arr_length, height) {
 }
 
 module line(length, width=DIM_LINE_WIDTH,
-            height=DIM_HEIGHT,
             left_arrow=false,
             right_arrow=false
             ) {
-    /* This module draws a line that can have an arrow on either end.  Because
-     * the intended use is to be viewed strictly from above, the height of the
-     * line is set arbitrarily thin.
+    /* This module draws a line that can have an arrow on either end.
      *
      * The factors arr_length and arr_points are used to create a proportionate
      * arrow. Your sense of asthetics may lead you to choose different
@@ -145,32 +139,32 @@ module line(length, width=DIM_LINE_WIDTH,
     union() {
         if (left_arrow && right_arrow) {
             translate([arr_length, -width / 2, 0])
-            cube([length - arr_length * 2, width, height], center=false);
+            square([length - arr_length * 2, width], center=false);
         } else {
 
             if (left_arrow) {
                 translate([arr_length, -width / 2, 0])
-                cube([length - arr_length, width, height], center=false);
+                square([length - arr_length, width], center=false);
             } else {
                 if (right_arrow) {
                     translate([0, -width / 2, 0])
-                    cube([length - arr_length, width, height], center=false);
+                    square([length - arr_length, width], center=false);
                 } else {
                     translate([0, -width / 2, 0])
-                    cube([length, width, height], center=false);
+                    square([length, width], center=false);
                 }
 
             }
         }
 
         if (left_arrow) {
-            arrow(arr_points, arr_length, height);
+            arrow(arr_points, arr_length);
         }
 
         if (right_arrow) {
             translate([length, 0, 0])
             rotate([0, 0, 180])
-            arrow(arr_points, arr_length, height);
+            arrow(arr_points, arr_length);
 
         }
     }
@@ -180,30 +174,30 @@ module line(length, width=DIM_LINE_WIDTH,
 module circle_center(radius, size=DIM_HOLE_CENTER, line_width=DIM_LINE_WIDTH) {
 
     translate([-size / 2, 0, 0])
-    line(length=size, width=line_width, height=DIM_HEIGHT, left_arrow=false,
+    line(length=size, width=line_width, left_arrow=false,
         right_arrow=false);
 
     translate([radius - size / 2, 0, 0])
-    line(length=size, width=line_width, height=DIM_HEIGHT, left_arrow=false,
+    line(length=size, width=line_width, left_arrow=false,
         right_arrow=false);
 
     translate([-radius - size / 2, 0, 0])
-    line(length=size, width=line_width, height=DIM_HEIGHT, left_arrow=false,
+    line(length=size, width=line_width, left_arrow=false,
         right_arrow=false);
 
     translate([0, -size / 2, 0])
     rotate([0, 0, 90])
-    line(length=size, width=line_width, height=DIM_HEIGHT, left_arrow=false,
+    line(length=size, width=line_width, left_arrow=false,
          right_arrow=false);
 
     translate([0, radius - size / 2, 0])
     rotate([0, 0, 90])
-    line(length=size, width=line_width, height=DIM_HEIGHT, left_arrow=false,
+    line(length=size, width=line_width, left_arrow=false,
         right_arrow=false);
 
     translate([0, -radius - size / 2, 0])
     rotate([0, 0, 90])
-    line(length=size, width=line_width, height=DIM_HEIGHT, left_arrow=false,
+    line(length=size, width=line_width, left_arrow=false,
         right_arrow=false);
 
 }
@@ -216,13 +210,11 @@ function text_or_length(length, mytext) = (len(mytext) == 0)
  *
  * Modifier for standard text() module. Performs two modification:
  * - Scales text to match size of dimension lines.
- * - Extrudes text into a 3D object so that dimensions don't mix 2D and 3D objects
  *
  * To use this modifier, place it immediately before a text() call.
  */
 module scale_text()
 {
-    linear_extrude(DIM_HEIGHT, convexity=10)
         scale([DIM_FONTSIZE/10, DIM_FONTSIZE/10])
             children();
 }
@@ -233,25 +225,25 @@ module dimensions(length, line_width=DIM_LINE_WIDTH, loc=DIM_CENTER,
     space = len(text_or_length(length, mytext)) * DIM_FONTSIZE;
 
     if (loc == DIM_CENTER) {
-        line(length=length / 2 - space / 2, width=line_width, height=DIM_HEIGHT,
+        line(length=length / 2 - space / 2, width=line_width,
              left_arrow=true, right_arrow=false);
         translate([(length) / 2, 0]) scale_text()
             text(text_or_length(length, mytext), halign="center", valign="center");
 
         translate([length / 2 + space / 2, 0, 0])
-        line(length=length / 2 - space / 2, width=line_width, height=DIM_HEIGHT,
+        line(length=length / 2 - space / 2, width=line_width,
              left_arrow=false, right_arrow=true);
     } else {
 
         if (loc == DIM_LEFT) {
-            line(length=length, width=line_width, height=DIM_HEIGHT,
+            line(length=length, width=line_width,
                  left_arrow=true, right_arrow=true);
 
             translate([-DIM_FONTSIZE, 0]) scale_text()
                 text(text_or_length(length, mytext), halign="right", valign="center");
         } else {
             if (loc == DIM_RIGHT) {
-                line(length=length, width=line_width, height=DIM_HEIGHT,
+                line(length=length, width=line_width,
                      left_arrow=true, right_arrow=true);
 
                 translate([length+DIM_FONTSIZE, 0]) scale_text()
@@ -260,14 +252,14 @@ module dimensions(length, line_width=DIM_LINE_WIDTH, loc=DIM_CENTER,
                 if (loc == DIM_OUTSIDE) {
 
                     rotate([0, 180, 0])
-                    line(length=length / 2, width=line_width, height=DIM_HEIGHT,
+                    line(length=length / 2, width=line_width,
                          left_arrow=true, right_arrow=false);
 
                     translate([(length) / 2, 0]) scale_text()
                         text(text_or_length(length, mytext), halign="center", valign="center");
 
                     translate([length, 0, 0])
-                    line(length=length / 2, width=line_width, height=DIM_HEIGHT,
+                    line(length=length / 2, width=line_width,
                          left_arrow=true, right_arrow=false);
                 }
             }
@@ -291,15 +283,14 @@ module leader_line(angle, radius, angle_length, horz_line_length,
 
     rotate([0, 0, angle])
     translate([radius, 0, 0])
-    line(length=angle_length, width=line_width, height=DIM_HEIGHT,
-        left_arrow=true, right_arrow=false);
+    line(length=angle_length, width=line_width, left_arrow=true, right_arrow=false);
 
     rotate([0, 0, angle])
     translate([radius + angle_length, 0, 0])
     rotate([0, 0, -angle])
     union() {
         if (direction == DIM_RIGHT) {
-            line(length=horz_line_length, width=line_width, height=DIM_HEIGHT,
+            line(length=horz_line_length, width=line_width,
                  left_arrow=false, right_arrow=false);
 
             // Using centered text so that the 'do_circle' feature looks correct
@@ -310,16 +301,16 @@ module leader_line(angle, radius, angle_length, horz_line_length,
                 translate([(horz_line_length + space + text_length/2),
                           0,  0])
                 difference() {
-                    cylinder(h=DIM_HEIGHT, r=text_length + space - line_width,
+                    circle(r=text_length + space - line_width,
                             center=true, $fn=100);
-                    cylinder(h=.05, r=text_length + space - line_width * 2,
+                    circle(r=text_length + space - line_width * 2,
                             center=true, $fn=100);
                 }
             }
 
         } else {
             translate([-horz_line_length, 0, 0])
-            line(length=horz_line_length, width=line_width, height=DIM_HEIGHT,
+            line(length=horz_line_length, width=line_width,
                  left_arrow=false, right_arrow=false);
 
             translate([-(horz_line_length + space), 0]) scale_text()
@@ -360,12 +351,10 @@ module titleblock(lines, descs, details) {
         if (line[2] == DIM_VERT) {
             rotate([0, 0, -90])
             line(length=line[3] * DIM_LINE_WIDTH,
-                 width=DIM_LINE_WIDTH * line[4], height=DIM_HEIGHT,
-                left_arrow=false, right_arrow=false);
+                 width=DIM_LINE_WIDTH * line[4], left_arrow=false, right_arrow=false);
         } else {
             line(length=(line[3] + 1) * DIM_LINE_WIDTH,
-                 width=DIM_LINE_WIDTH * line[4], height=DIM_HEIGHT,
-                left_arrow=false, right_arrow=false);
+                 width=DIM_LINE_WIDTH * line[4], left_arrow=false, right_arrow=false);
         }
 
     }
@@ -684,16 +673,16 @@ module sample_titleblock2() {
 module sample_lines(){
     // sample lines
     union() {
-        line(length=2 * DIM_SAMPLE_SCALE, width=DIM_LINE_WIDTH, height=DIM_HEIGHT,
+        line(length=2 * DIM_SAMPLE_SCALE, width=DIM_LINE_WIDTH,
             left_arrow=false, right_arrow=false);
         translate([0, -0.25 * DIM_SAMPLE_SCALE, 0])
-        line(length=2 * DIM_SAMPLE_SCALE, width=DIM_LINE_WIDTH, height=DIM_HEIGHT, left_arrow=true,
+        line(length=2 * DIM_SAMPLE_SCALE, width=DIM_LINE_WIDTH, left_arrow=true,
             right_arrow=false);
         translate([0, -0.5 * DIM_SAMPLE_SCALE, 0])
-        line(length=2 * DIM_SAMPLE_SCALE, width=DIM_LINE_WIDTH, height=DIM_HEIGHT,
+        line(length=2 * DIM_SAMPLE_SCALE, width=DIM_LINE_WIDTH,
             left_arrow=false, right_arrow=true);
         translate([0, -0.75 * DIM_SAMPLE_SCALE, 0])
-        line(length=2 * DIM_SAMPLE_SCALE, width=DIM_LINE_WIDTH, height=DIM_HEIGHT, left_arrow=true,
+        line(length=2 * DIM_SAMPLE_SCALE, width=DIM_LINE_WIDTH, left_arrow=true,
             right_arrow=true);
     }
 }
@@ -713,13 +702,13 @@ module sample_dimensions() {
     // left arrow
     translate([0, -1.75 * DIM_SAMPLE_SCALE, 0])
     rotate([0, 0, 90])
-    line(length=length, width=DIM_LINE_WIDTH, height=DIM_HEIGHT,
+    line(length=length, width=DIM_LINE_WIDTH,
          left_arrow=false, right_arrow=false);
 
     // right arrow
     translate([length, -1.75 * DIM_SAMPLE_SCALE, 0])
     rotate([0, 0, 90])
-    line(length=length, width=DIM_LINE_WIDTH, height=DIM_HEIGHT,
+    line(length=length, width=DIM_LINE_WIDTH,
          left_arrow=false, right_arrow=false);
 
     //  The following runs through all the dimension types
@@ -748,13 +737,13 @@ module sample_dimensions_with_text(mytext) {
     // left arrow
     translate([0, -1.75 * DIM_SAMPLE_SCALE, 0])
     rotate([0, 0, 90])
-    line(length=length, width=DIM_LINE_WIDTH, height=DIM_HEIGHT,
+    line(length=length, width=DIM_LINE_WIDTH,
          left_arrow=false, right_arrow=false);
 
     // right arrow
     translate([length, -1.75 * DIM_SAMPLE_SCALE, 0])
     rotate([0, 0, 90])
-    line(length=length, width=DIM_LINE_WIDTH, height=DIM_HEIGHT,
+    line(length=length, width=DIM_LINE_WIDTH,
          left_arrow=false, right_arrow=false);
 
     //  The following runs through all the dimension types

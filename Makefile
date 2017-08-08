@@ -9,4 +9,4 @@ include $(wildcard *.deps)
 %-lasercut.svg: %.scad
 	time openscad -m make -o $@ -d $@.deps -D 'OUTPUT_MODE="lasercut"' $<
 %.svg: %.scad
-	time openscad -m make -o $@ -d $@.deps -D 'OUTPUT_MODE="drawings"' $<
+	time openscad -m make -o $@ -d $@.deps -D 'OUTPUT_MODE="dimensions"' $<

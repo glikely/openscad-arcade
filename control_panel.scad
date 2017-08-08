@@ -304,9 +304,6 @@ module panel(size=default_size, inset, r=default_radius,
 		}
 	}
 
-	if (action == "drawings") projection()
-		panel(size, inset=inset, r=r, pc=pc, layers=layers, action="dimensions", cpu_window=cpu_window);
-
 	// Carve the panel itself
 	if (action == "full" || action == "add" || action == "lasercut") {
 		panel_multilayer(layers=layers, distribute=(action == "lasercut") ? [0,350,0] : 0,
