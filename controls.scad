@@ -75,7 +75,7 @@ module sanwa_jlf_8s(color="red", action="add")
 	ears = [53,107,1.6];
 	bolthole_spacing = 107/2-6;
 	bolthole_radius = 7/2;
-	box = [75,61,33];
+	box = [76,61,33];
 	tophole_radius = 10;
 
 	if (action=="add") {
@@ -205,7 +205,7 @@ module utrak_trackball(action="add")
 	hole_spacing = 81.32;
 	hole_radius = 6/2;
 	housing_height = 19;
-	housing_radius = 82/2;
+	housing_radius = 83/2;
 	bezel_radius = 86/2;
 	bezel_height = 8;
 	flang_height = 2;
