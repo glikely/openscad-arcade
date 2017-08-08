@@ -209,9 +209,9 @@ layer_gap = 0.01;
 default_layers = [
 	[[0,0,1,.3], plex_thick, 0], // 3mm Perspex topsheet
 	[[0,0,0], layer_gap*3, 0], // Vinyl Graphic Overlay
-	[FiberBoard, 6, 0],   // MDF Top (6mm)
-	[FiberBoard, 2, -8], // MDF Middle (2mm) with t-moulding groove
-	[FiberBoard, 6, 0],   // MDF Bottom (6mm)
+	[FiberBoard, 6, 0, -90],   // MDF Top (6mm)
+	[FiberBoard, 2, -8,-18], // MDF Middle (2mm) with t-moulding groove
+	[FiberBoard, 6, 0, 80],   // MDF Bottom (6mm)
 ];
 
 function layer_depth(layers=default_layers, n, i=0) =
@@ -244,7 +244,7 @@ module panel_multilayer(layers=default_layers, distribute=[0,0,0], action="add")
 			children([1]);
 		}
 
-		if (action == "lasercut") difference() {
+		if (action == "lasercut") jigsaw_cut(layer[3]) difference() {
 			offset(r=layer[2]) children([0]);
 			// Trim the negative object to only this layer
 			projection() intersection() {

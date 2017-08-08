@@ -65,7 +65,7 @@ module fourcorners()
  * tdepth: depth of jigsaw teeth
  * r: curve radius for smoothing
  */
-module jigsaw_mask(size, tcount=2, tdepth=10, r=3)
+module jigsaw_mask(size, tcount=7, tdepth=10, r=3)
 {
 	tsize = size.y/tcount/2;
 
@@ -79,6 +79,21 @@ module jigsaw_mask(size, tcount=2, tdepth=10, r=3)
 				         [0,     tsize/2-tdepth/4],
 				         [0,    -tsize/2+tdepth/4]]);
 		}
+	}
+}
+
+module jigsaw_cut(y) {
+	if (y) {
+		translate([-15,0]) difference() {
+			children();
+			translate([y,-345]) jigsaw_mask([1000,350]);
+		}
+		translate ([15,0]) intersection() {
+			children();
+			translate([y,-345]) jigsaw_mask([1000,350]);
+		}
+	} else {
+		children();
 	}
 }
 
