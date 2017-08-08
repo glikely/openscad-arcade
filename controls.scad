@@ -74,7 +74,7 @@ module sanwa_jlf_8s(color="red", action="add")
 	ear_inset = 8;
 	ears = [53,107,1.6];
 	bolthole_spacing = 107/2-6;
-	bolthole_radius = 2.5;
+	bolthole_radius = 7/2;
 	box = [75,61,33];
 	tophole_radius = 10;
 
@@ -122,6 +122,11 @@ module sanwa_jlf_8s(color="red", action="add")
 		translate([0,0,0]) cylinder(r=tophole_radius, h=panel_depth());
 	} else if (action=="dimensions") {
 		circle_center(radius=tophole_radius);
+		// Mounting holes
+		translate([0,bolthole_spacing,0])
+			circle_center(radius=bolthole_radius);
+		translate([0,-bolthole_spacing,0])
+			circle_center(radius=bolthole_radius);
 	}
 }
 
@@ -198,7 +203,7 @@ module utrak_trackball(action="add")
 	diag_length = 176;
 	diag_width = 126.5;
 	hole_spacing = 81.32;
-	hole_radius = 5/2;
+	hole_radius = 6/2;
 	housing_height = 19;
 	housing_radius = 82/2;
 	bezel_radius = 86/2;
