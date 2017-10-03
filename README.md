@@ -52,12 +52,13 @@ warned!)
 
 ## Using the output
 
-The intent of this project is to output design files that can be either directly
-laser cut on materials (ex. acrylic),
-or used to create cutting guides for materials that cannot be laser cut (ex. MDF
-or plywood).
-The project currently creates correct models for how panels should be cut,
-but does not yet output appropriate design files. Stay tuned...
+This project outputs design files that can be either directly laser cut on
+materials (ex. acrylic & MDF),
+or used to create cutting guides for materials that cannot be laser cut (ex.
+plywood).
+Viewing a project file (see example_*.scad) in OpenSCAD will show the 3D model.
+To produce manufacturing artifacts change the value of OUTPUT_MODE to either
+"lasercut" or "dimensions".
 
 ## TODO
 

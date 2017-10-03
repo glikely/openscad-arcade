@@ -12,9 +12,10 @@ pconfig = [[6, "green", "sega2", true],
            [], [], [], [],
            [6, "yellow", "sega2", true]];
 
-size=[1200,340,100];
+size=[1200,340,85];
 
 //OUTPUT_MODE = "lasercut";
+//OUTPUT_MODE = "dimensions";
 OUTPUT_MODE = "full";
 
-panel(size,pc=pconfig, r=2000, action=OUTPUT_MODE, cpu_window=true);
+panel(size,pc=pconfig, r=2000, action=OUTPUT_MODE, cpu_window=true, mount_angle=3);

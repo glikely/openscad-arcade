@@ -15,7 +15,7 @@ use <dimlines.scad>
  *         and limitations of manufacturing process (ie. when using
  *         router to cut out the panel.
  */
-module panel_profile(size, inset, r, corner=10, action="profile")
+module panel_profile(size, inset, r, corner=10, mount_angle, action="profile")
 {
 	// Calculate the front and back edge locations of the centre section
 	curve_origin=r-size[1];
@@ -23,6 +23,7 @@ module panel_profile(size, inset, r, corner=10, action="profile")
 	front = r ? sqrt(pow(r,2)-pow(size[0]/2,2)) - curve_origin : size[1];
 	keystone = r ? (back+curve_origin)/(front+curve_origin) : 1;
 	delta = r ? (size[0]/2)*(1 - (back+curve_origin)/(front+curve_origin)) : 0;
+	panel_arc = r ? asin((size[0]/2)/r)*2 : 0;
 
 	if (action == "profile") round_corners(corner) {
 		// Main block of panel. Might be trapezoidal
@@ -31,7 +32,6 @@ module panel_profile(size, inset, r, corner=10, action="profile")
 
 		// Optional curved front
 		if (r) intersection() {
-			panel_arc = asin((size[0]/2)/r)*2;
 			//echo(str("Panel Arc: ", panel_arc, "°"));
 			translate([0,curve_origin,0]) circle(r,$fa=2);
 			translate([-size[0]/2, -size[1]])
@@ -44,6 +44,36 @@ module panel_profile(size, inset, r, corner=10, action="profile")
 			translate([-inset[0]/2,-inset[1]-0.1,0])
 				square([inset[0],inset[1]+0.1]);
 		}
+	}
+
+	if (action == "frame") {
+		height = size.z - panel_depth();
+		ffront = size[1] - 33;
+		a = [size[0]/2-delta-10, -back];
+		b = [a.x+(front-mdf_thick*2.25-back)*tan(panel_arc/2), -front+mdf_thick*2.25];
+		c = [b.x-(ffront+b.y)/tan(panel_arc/2), -ffront];
+		polygon ([[-a.x,a.y],[-b.x,b.y],[-c.x,c.y],c,b,a]);
+
+		// Print out the frame board dimensions
+		side_len = sqrt(pow(b.x-a.x,2)+pow(b.y-a.y,2));
+		frontlr_len = sqrt(pow(c.x-b.x,2)+pow(c.y-b.y,2));
+		echo("Frame board dimensions");
+		echo(str("Rear: length=", a.x*2, "mm ",
+		               "height=", height, "mm ",
+		               "mitre=", (90-panel_arc/2)/2, " ",
+		               "slope=", mount_angle));
+		echo(str("Side: length=", side_len, "mm ",
+		         "height(top,bottom)=", height, ",", height - tan(mount_angle) * (-b.y),"mm ",
+		         "mitre=", (90-panel_arc/2)/2, ",", 90/2, " deg ",
+		         "slope=", atan(tan(mount_angle)*cos(panel_arc/2)), " ",
+		         "bevel=", atan(tan(mount_angle)*sin(panel_arc/2))));
+		echo(str("Front L/R: length=", frontlr_len, "mm ",
+		         "height(top,bottom)=", height - tan(mount_angle) * (-b.y), ",", height - tan(mount_angle) * (-c.y),"mm ",
+		         "mitre=", (90/2), ",", panel_arc/2/2, " deg ",
+		         "slope=", atan(tan(mount_angle)*sin(panel_arc/2)), " ",
+		         "bevel=", atan(tan(mount_angle)*cos(panel_arc/2))));
+		echo(str("Front C:   length=", c.x*2, "mm height=", height - tan(mount_angle) * (-c.y), "mm ",
+		         "mitre=", panel_arc/2/2, " slope=", mount_angle));
 	}
 
 	if (action == "dimensions") {
@@ -88,6 +118,14 @@ module panel_profile(size, inset, r, corner=10, action="profile")
 		translate([size.x/2-delta,0]) line(delta+50);
 		translate([size.x/2,-size.y]) line(50);
 		translate([size.x/2+45,-size.y]) rotate([0,0,90]) dimensions(size.y);
+	}
+}
+
+module frame_extrude(frame_height, frame_thickness=21)
+{
+	translate([0,0,-frame_height]) linear_extrude(frame_height, convexity=10) difference() {
+		children();
+		offset(-frame_thickness) children();
 	}
 }
 
@@ -281,7 +319,7 @@ default_radius = 1000;
  */
 module panel(size=default_size, inset, r=default_radius,
              pc=player_config_4, layers=default_layers,
-             action="full", cpu_window=false)
+             action="full", cpu_window=false, mount_angle=3)
 {
 	$panel_depth = layer_depth(layers);
 	$panel_window_depth = layer_depth(layers, n=1);
@@ -290,6 +328,7 @@ module panel(size=default_size, inset, r=default_radius,
 	// Draw the controls first so that the if a transparent panel is used
 	// then the OpenSCAD preview will show the controls behind the panel
 	if (action == "full")
+		rotate([mount_angle,0,0])
 		panel_controls(size, inset, r, pc=pc, cpu_window=cpu_window);
 
 	// Draw placement guides
@@ -306,14 +345,20 @@ module panel(size=default_size, inset, r=default_radius,
 
 	// Carve the panel itself
 	if (action == "full" || action == "add" || action == "lasercut") {
+		rotate([mount_angle,0,0])
 		panel_multilayer(layers=layers, distribute=(action == "lasercut") ? [0,350,0] : 0,
 		                 action=(action == "lasercut") ? "lasercut" : "add") {
 			panel_profile(size, inset, r=r);
 			panel_controls(size, inset, r, pc=pc,
 			               cpu_window=cpu_window, action="remove");
 		}
+		translate([0,0,-panel_depth()]) difference() {
+			frame_height = size.z - panel_depth();
+			frame_extrude(frame_height)
+				panel_profile(size, inset, r=r, action="frame", mount_angle=mount_angle);
+			rotate([mount_angle,0,0]) translate([-size.x/2,-size.y]) cube([size.x, size.y, frame_height]);
+		}
 	}
-
 }
 
 test_radius=[0, 2000, 1000];
